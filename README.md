@@ -22,7 +22,7 @@ http://localhost:3000/redmine/issues/1 にアクセスするとチケット#1を
 
 ## Install
 
-`git clone git://github.com/8amjp/redmine-xlsx-express.git`
+`git clone git://github.com/8amjp/redmine-xio.git`
 
 ## Usage
 
