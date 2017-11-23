@@ -1,0 +1,23 @@
+extends layout
+
+block title
+  title New Tickets | Redmine Xio
+
+block content
+  .container
+    .row
+      .col-md-6.py-3
+        h1 Import New Ticket
+        p.lead 新しいチケットを登録します。
+      .col-md-6.py-3
+        .card.border-success
+          .card-body
+            h4.card-title.text-success Import New Ticket
+            p.card-text 指定したエクセル形式の帳票をインポートします。
+            input#file-input.form-control-file(type='file')
+            .text-right.my-3
+              button#import.btn.btn-success(type='button', onclick='importExcel()') Import
+            textarea#result.form-control(rows='3')
+
+block additional-script
+  script(src='/javascripts/core.js', id='core', data-issue='#{issue}')
