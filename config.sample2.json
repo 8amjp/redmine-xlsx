@@ -1,8 +1,27 @@
 {
   "api_key": "0000000000000000000000000000000000000000",
   "mapping_table": {
-    "template": "template.xlsx",
-    "issue": {
+    "1": {
+      "id"          : "A1",
+      "project"     : "B1",
+      "tracker"     : "C1",
+      "status"      : "D1",
+      "priority"    : "E1",
+      "author"      : "F1",
+      "assigned_to" : "G1",
+      "subject"     : "H1",
+      "description" : "I1",
+      "start_date"  : "J1",
+      "done_ratio"  : "K1",
+      "created_on"  : "L1",
+      "updated_on"  : "M1",
+      "custom_fields" : [
+        { "id": 1, "cell": "B1" },
+        { "id": 2, "cell": "B2" },
+        { "id": 3, "cell": "B3" }
+      ]
+    }
+    "2": {
       "id"          : "A1",
       "project"     : "B1",
       "tracker"     : "C1",

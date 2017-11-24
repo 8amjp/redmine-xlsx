@@ -1,12 +1,16 @@
 var Promise = XlsxPopulate.Promise;
-var core        = document.getElementById('core');
-var fileInput   = document.getElementById('file-input');
-var currentdata = document.getElementById('currentdata');
-var result      = document.getElementById('result');
-var templateDir = '/templates/';
+var core         = document.getElementById('core');
+var fileInput    = document.getElementById('file-input');
+var currentdata  = document.getElementById('currentdata');
+var imported     = document.getElementById('imported');
+var result       = document.getElementById('result');
+var submitButton = document.getElementById('submit');
+
+var templateDir = '/templates';
 var fileds = ['id','project','tracker','status','priority','author','assigned_to','subject','description','start_date','done_ratio','created_on','updated_on'];
 var issue;
 var table;
+var postdata;
 
 // ページ読み込み時の処理
 window.onload = function() {
@@ -15,9 +19,13 @@ window.onload = function() {
   currentdata.value = `ID: ${issue.id}\nプロジェクト: ${issue.project.name}(${issue.project.id})\nトラッカー: ${issue.tracker.name}(${issue.tracker.id})\n題名: ${issue.subject}`;
 }
 
+/*
+  入出力共通の処理
+  */
+
 // マッピングテーブルを返す
 function getMappingTable () {
-  return table[issue.project.id][issue.tracker.id];
+  return table[issue.project.id][issue.tracker.id] || table[issue.project.id] || table;
 }
 
 /*
@@ -28,15 +36,37 @@ function getMappingTable () {
 function importExcel() {
   getWorkbook()
     .then(function (workbook) {
+      postdata = {
+        'issue' : {}
+      };
       // シートの読み込み
       var mappingtable = getMappingTable();
       var sheet =workbook.sheet(0);
-
-      result.value = workbook.sheet(0).cell("C2").value();
+      // カスタムフィールドのデータ
+      var custom_fields = [];
+      mappingtable.custom_fields.forEach(function(item) {
+        if (item.cell) custom_fields.push({"value": sheet.cell(item.cell.toUpperCase()).value(), "id": item.id});
+      });
+      // 基本フィールドのデータ// TODO
+      if(mappingtable['project'])         postdata['issue']['project_id']       = sheet.cell(mappingtable['project'].toUpperCase()).value();
+      if(mappingtable['tracker'])         postdata['issue']['tracker_id']       = sheet.cell(mappingtable['tracker'].toUpperCase()).value();
+      if(mappingtable['status'])          postdata['issue']['status_id']        = sheet.cell(mappingtable['status'].toUpperCase()).value();
+      if(mappingtable['priority'])        postdata['issue']['priority_id']      = sheet.cell(mappingtable['priority'].toUpperCase()).value();
+      if(mappingtable['category'])        postdata['issue']['category_id']      = sheet.cell(mappingtable['category'].toUpperCase()).value();
+      if(mappingtable['fixed_version'])   postdata['issue']['fixed_version_id'] = sheet.cell(mappingtable['fixed_version'].toUpperCase()).value();
+      if(mappingtable['assigned_to'])     postdata['issue']['assigned_to_id']   = sheet.cell(mappingtable['assigned_to'].toUpperCase()).value();
+      if(mappingtable['subject'])         postdata['issue']['subject']          = sheet.cell(mappingtable['subject'].toUpperCase()).value();
+      if(mappingtable['description'])     postdata['issue']['description']      = sheet.cell(mappingtable['description'].toUpperCase()).value();
+      if(mappingtable['start_date'])      postdata['issue']['start_date']       = sheet.cell(mappingtable['start_date'].toUpperCase()).value();
+      if(mappingtable['done_ratio'])      postdata['issue']['done_ratio']       = sheet.cell(mappingtable['done_ratio'].toUpperCase()).value();
+      if(mappingtable['estimated_hours']) postdata['issue']['estimated_hours']  = sheet.cell(mappingtable['estimated_hours'].toUpperCase()).value();
+      if(mappingtable['custom_fields'])   postdata['issue']['custom_fields']    = custom_fields;
+      if(mappingtable['created_on'])      postdata['issue']['created_on']       = sheet.cell(mappingtable['created_on'].toUpperCase()).value();
+      if(mappingtable['updated_on'])      postdata['issue']['updated_on']       = sheet.cell(mappingtable['updated_on'].toUpperCase()).value();
+      imported.value = JSON.stringify(postdata, null, '\t');
     })
     .catch(function (err) {
-      var message = (err.message || err);
-      result.value = `${message}\n${result.value}`;
+      imported.value = (err.message || err);
     });
 }
 
@@ -47,16 +77,8 @@ function getWorkbook() {
   return XlsxPopulate.fromDataAsync(file);
 }
 
-// シートを読み込み
-function readSheet (sheet) {
-  var mappingtable = getMappingTable();
-  data.forEach(function(item) {
-    sheet.cell(item.cell.toUpperCase()).value(item.value);
-  });
-}
-
 // データ送信
-function postIssue(data) {
+function postIssue() {
   var xhr = new XMLHttpRequest();
   var url = location.href;
   try{
@@ -67,9 +89,9 @@ function postIssue(data) {
         result.value = `${xhr.responseText}\n${result.value}`;
       }
     };
-    xhr.send(JSON.stringify(data));
+    xhr.send(JSON.stringify(postdata));
   } catch(e) {
-    console.log('catch', e);
+    console.log(e);
   }
 }
 
@@ -104,17 +126,17 @@ function exportExcel() {
 // 出力用ファイルの生成
 function generate() {
   var mappingtable = getMappingTable();
-  return getTemplate(mappingtable.template)
+  return getTemplate()
     .then(function (workbook) {
       // シートに書き込み
       var sheet = workbook.sheet(0);
       // チケットの基本データ
       fileds.forEach(function(key) {
-        // 対象のキーがnameプロパティを持っていればその値を、そうでなければ対象のキーの値を出力
-        if(mappingtable.issue[key]) sheet.cell(mappingtable.issue[key].toUpperCase()).value(issue[key]['name'] || issue[key]);
+        // 対象のキーがnameプロパティを持っていればその値を、そうでなければ対象のキーの値を出力 //TODO
+        if(mappingtable[key]) sheet.cell(mappingtable[key].toUpperCase()).value(issue[key]['name'] || issue[key]);
       });
       // カスタムフィールドのデータ
-      mappingtable.issue.custom_fields.forEach(function(item) {
+      mappingtable.custom_fields.forEach(function(item) {
         if (item.cell) {
           // カスタムフィールドIDが一致する配列のみ抽出
           var cf = issue.custom_fields.filter(function(custom_fields, i) {
@@ -128,10 +150,11 @@ function generate() {
 }
 
 // テンプレートファイルの取得
-function getTemplate(templatePath) {
+function getTemplate() {
+  var templatePath = `${templateDir}/${issue.project.id}/${issue.tracker.id}.xlsx`;
   return new Promise(function (resolve, reject) {
     var xhr = new XMLHttpRequest();
-    xhr.open("GET", `${templateDir}${templatePath}`, true);
+    xhr.open("GET", templatePath, true);
     xhr.responseType = "arraybuffer";
     xhr.onreadystatechange = function () {
       if (xhr.readyState === XMLHttpRequest.DONE){

@@ -18,11 +18,18 @@ block content
         .card.border-success
           .card-body
             h4.card-title.text-success Import
-            p.card-text 指定したエクセル形式の帳票をインポートします。
+            p.card-text (1) 「ファイルを選択」ボタンを押して、取り込むファイルを指定します。
             input#file-input.form-control-file(type='file')
+            hr
+            p.card-text (2) 「Import」ボタンを押して、ファイルを読み込みます。
             .text-right.my-3
               button#import.btn.btn-success(type='button', onclick='importExcel()') Import
-            textarea#result.form-control(rows='3')
+            textarea#imported.form-control(rows='3')
+            hr
+            p.card-text (3) 「Submit」ボタンを押して、インポートを実行します。
+            .text-right.my-3
+              button#submit.btn.btn-success(type='button', onclick='postIssue()') Submit
+            textarea#result.form-control(rows='1')
       .col-md-6.py-3
         .card.border-success
           .card-body
