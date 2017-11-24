@@ -1,6 +1,8 @@
-redmine-xlsx-express
-====================
+Redmine Xio
+===========
 
+Redmine Xlsx Input-Output tool.
+    
 [Redmine](http://www.redmine.org/)に、Excelファイルをインポート/エクスポートできる機能を追加します。  
 が、プラグインを作るのは大変なので、[Express](https://www.npmjs.com/package/express)でWebサーバーを立ててAPIで連携します。
 
@@ -17,8 +19,7 @@ http://localhost:3000/redmine/issues/1 にアクセスするとチケット#1を
 * [xlsx-populate](https://www.npmjs.com/package/xlsx-populate) Excelファイルの読み書き
 * [request](https://www.npmjs.com/package/request) Redmine Rest APIとの通信
 * [bootstrap](https://www.npmjs.com/package/bootstrap)
-  - [jQuery](https://www.npmjs.com/package/jquery)
-  - [popper.js](https://www.npmjs.com/package/popper.js)
+* [jQuery](https://www.npmjs.com/package/jquery)
 
 ## Install
 
