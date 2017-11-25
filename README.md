@@ -23,13 +23,21 @@ http://localhost:3000/redmine/issues/1 にアクセスするとチケット#1を
 
 ## Install
 
+Redmineと同じサーバー上に
+
 `git clone git://github.com/8amjp/redmine-xio.git`
+
+で取得して、
+
+`npm install`
+
+で追加モジュールをインストールしてください。
 
 ## Usage
 
-Redmineと同じサーバーで起動させます。
+起動前にいくつか準備するものがあります。
 
-### テンプレートファイルの準備
+### 設定ファイル(config.json)
 
 Excelファイル(.xlsx)のエクスポートは、`public/templates` ディレクトリ内のテンプレートファイルを読み込んで
 追記する方式を取っていますので、事前に準備する必要があります。
