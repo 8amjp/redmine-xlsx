@@ -1,0 +1,12 @@
+.card.border-success
+  .card-body
+    h4.card-title.text-success Import
+    p.card-text (1) 「ファイルを選択」ボタンを押して、取り込むファイルを指定します。
+    input#file-input.form-control-file(type='file', accept='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    label(for='imported-data') 読み込まれたデータ:
+    textarea#imported-data.form-control(rows='3', readonly='')
+    hr
+    p.card-text (2) 「Import」ボタンを押して、インポートを実行します。
+    .text-right.my-3
+      button#import-submit.btn.btn-success(type='button') Import
+    textarea#import-result.form-control(rows='1', readonly='')

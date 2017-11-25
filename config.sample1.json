@@ -1,47 +1,51 @@
 {
   "api_key": "0000000000000000000000000000000000000000",
-  "mapping_table": {
-    "1": {
-      "1": {
-        "id"          : "A1",
-        "project"     : "B1",
-        "tracker"     : "C1",
-        "status"      : "D1",
-        "priority"    : "E1",
-        "author"      : "F1",
-        "assigned_to" : "G1",
-        "subject"     : "H1",
-        "description" : "I1",
-        "start_date"  : "J1",
-        "done_ratio"  : "K1",
-        "created_on"  : "L1",
-        "updated_on"  : "M1",
-        "custom_fields" : [
-          { "id": 1, "cell": "B1" },
-          { "id": 2, "cell": "B2" },
-          { "id": 3, "cell": "B3" }
-        ]
+  "template": {
+    "title" : "template",
+    "filename" : "template.xlsx",
+    "mapping_table": {
+      "id" : "A1",
+      "project" : {
+        "id"   : "A2",
+        "name" : "B2"
       },
-      "2": {
-        "id"          : "A1",
-        "project"     : "B1",
-        "tracker"     : "C1",
-        "status"      : "D1",
-        "priority"    : "E1",
-        "author"      : "F1",
-        "assigned_to" : "G1",
-        "subject"     : "H1",
-        "description" : "I1",
-        "start_date"  : "J1",
-        "done_ratio"  : "K1",
-        "created_on"  : "L1",
-        "updated_on"  : "M1",
-        "custom_fields" : [
-          { "id": 1, "cell": "B1" },
-          { "id": 2, "cell": "B2" },
-          { "id": 3, "cell": "B3" }
-        ]
-      }
+      "tracker" : {
+        "id"   : "A3",
+        "name" : "B3"
+      },
+      "status" : {
+        "id"   : "A4",
+        "name" : "B4"
+      },
+      "priority" : {
+        "id"   : "A5",
+        "name" : "B5"
+      },
+      "author" : {
+        "id"   : "A6",
+        "name" : "B6"
+      },
+      "category" : {
+        "id"   : "A7",
+        "name" : "B7"
+      },
+      "assigned_to" : {
+        "id"   : "A8",
+        "name" : "B8"
+      },
+      "subject"         : "A9",
+      "description"     : "A10",
+      "start_date"      : "A11",
+      "done_ratio"      : "A12",
+      "estimated_hours" : "A13",
+      "created_on"      : "A14",
+      "updated_on"      : "A15",
+      "custom_fields" : [
+        { "id": 1, "cell": "C1" },
+        { "id": 2, "cell": "C2" },
+        { "id": 3, "cell": "C3" }
+      ]
     }
   }
 }
+

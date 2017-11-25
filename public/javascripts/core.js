@@ -1,170 +1,208 @@
-var Promise = XlsxPopulate.Promise;
-var core         = document.getElementById('core');
-var fileInput    = document.getElementById('file-input');
-var currentdata  = document.getElementById('currentdata');
-var imported     = document.getElementById('imported');
-var result       = document.getElementById('result');
-var submitButton = document.getElementById('submit');
+(function(){
+  const Promise = XlsxPopulate.Promise;
+  const core = document.getElementById('core');
+  const fileInput    = document.getElementById('file-input');
+  const exportButton = document.getElementById('export-submit');
+  const importButton = document.getElementById('import-submit');
+  const currentData  = document.getElementById('current-data');
+  const importedData = document.getElementById('imported-data');
+  const importResult = document.getElementById('import-result');
+  const templateSelector = document.getElementById('template-selector');
+  const templateDir = '/templates';
 
-var templateDir = '/templates';
-var fileds = ['id','project','tracker','status','priority','author','assigned_to','subject','description','start_date','done_ratio','created_on','updated_on'];
-var issue;
-var table;
-var postdata;
+  var postdata;
 
-// ページ読み込み時の処理
-window.onload = function() {
-  issue = JSON.parse(core.dataset.issue).issue;
-  table = JSON.parse(core.dataset.table);
-  currentdata.value = `ID: ${issue.id}\nプロジェクト: ${issue.project.name}(${issue.project.id})\nトラッカー: ${issue.tracker.name}(${issue.tracker.id})\n題名: ${issue.subject}`;
-}
+  /*
+    入出力共通の処理
+    */
+  window.onload = function() {
+    if(fileInput) fileInput.addEventListener('change', importExcel, false);
+    if(exportButton) exportButton.addEventListener('click', exportExcel, false);
+    if(importButton) importButton.addEventListener('click', postIssue, false);
+    if(currentData) currentData.value = JSON.stringify(JSON.parse(core.dataset.issue), null, '  ');
+    if(templateSelector) addTemplateSelector();
+  };
 
-/*
-  入出力共通の処理
-  */
-
-// マッピングテーブルを返す
-function getMappingTable () {
-  return table[issue.project.id][issue.tracker.id] || table[issue.project.id] || table;
-}
-
-/*
-  入力処理
-  */
-
-// ファイルを入力
-function importExcel() {
-  getWorkbook()
-    .then(function (workbook) {
-      postdata = {
-        'issue' : {}
-      };
-      // シートの読み込み
-      var mappingtable = getMappingTable();
-      var sheet =workbook.sheet(0);
-      // カスタムフィールドのデータ
-      var custom_fields = [];
-      mappingtable.custom_fields.forEach(function(item) {
-        if (item.cell) custom_fields.push({"value": sheet.cell(item.cell.toUpperCase()).value(), "id": item.id});
-      });
-      // 基本フィールドのデータ// TODO
-      if(mappingtable['project'])         postdata['issue']['project_id']       = sheet.cell(mappingtable['project'].toUpperCase()).value();
-      if(mappingtable['tracker'])         postdata['issue']['tracker_id']       = sheet.cell(mappingtable['tracker'].toUpperCase()).value();
-      if(mappingtable['status'])          postdata['issue']['status_id']        = sheet.cell(mappingtable['status'].toUpperCase()).value();
-      if(mappingtable['priority'])        postdata['issue']['priority_id']      = sheet.cell(mappingtable['priority'].toUpperCase()).value();
-      if(mappingtable['category'])        postdata['issue']['category_id']      = sheet.cell(mappingtable['category'].toUpperCase()).value();
-      if(mappingtable['fixed_version'])   postdata['issue']['fixed_version_id'] = sheet.cell(mappingtable['fixed_version'].toUpperCase()).value();
-      if(mappingtable['assigned_to'])     postdata['issue']['assigned_to_id']   = sheet.cell(mappingtable['assigned_to'].toUpperCase()).value();
-      if(mappingtable['subject'])         postdata['issue']['subject']          = sheet.cell(mappingtable['subject'].toUpperCase()).value();
-      if(mappingtable['description'])     postdata['issue']['description']      = sheet.cell(mappingtable['description'].toUpperCase()).value();
-      if(mappingtable['start_date'])      postdata['issue']['start_date']       = sheet.cell(mappingtable['start_date'].toUpperCase()).value();
-      if(mappingtable['done_ratio'])      postdata['issue']['done_ratio']       = sheet.cell(mappingtable['done_ratio'].toUpperCase()).value();
-      if(mappingtable['estimated_hours']) postdata['issue']['estimated_hours']  = sheet.cell(mappingtable['estimated_hours'].toUpperCase()).value();
-      if(mappingtable['custom_fields'])   postdata['issue']['custom_fields']    = custom_fields;
-      if(mappingtable['created_on'])      postdata['issue']['created_on']       = sheet.cell(mappingtable['created_on'].toUpperCase()).value();
-      if(mappingtable['updated_on'])      postdata['issue']['updated_on']       = sheet.cell(mappingtable['updated_on'].toUpperCase()).value();
-      imported.value = JSON.stringify(postdata, null, '\t');
-    })
-    .catch(function (err) {
-      imported.value = (err.message || err);
-    });
-}
-
-// 入力ファイルの取得
-function getWorkbook() {
-  var file = fileInput.files[0];
-  if (!file) return Promise.reject("ファイルを選択してください！");
-  return XlsxPopulate.fromDataAsync(file);
-}
-
-// データ送信
-function postIssue() {
-  var xhr = new XMLHttpRequest();
-  var url = location.href;
-  try{
-    xhr.open("POST", url, true);
-    xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
-    xhr.onreadystatechange = function () {
-      if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-        result.value = `${xhr.responseText}\n${result.value}`;
-      }
-    };
-    xhr.send(JSON.stringify(postdata));
-  } catch(e) {
-    console.log(e);
+  // テンプレートの情報を返す
+  function getTemplateInfo(project_id, tracker_id) {
+    var template = JSON.parse(core.dataset.template);
+    return template[project_id][tracker_id] || template[project_id] || template;
   }
-}
 
-/*
-  出力処理
-  */
+  // セルのアドレスの書式として正しいかどうかを返す
+  function isCell(s) {
+    return /[A-Z]+[0-9]+/.test(s);
+  }
 
-// ファイルを出力
-function exportExcel() {
-  var outputFileName = `${issue.id}.xlsx`;
-  return generate()
-    .then(function (blob) {
-      if (window.navigator && window.navigator.msSaveOrOpenBlob) {
-        window.navigator.msSaveOrOpenBlob(blob, outputFileName);
-      } else {
-        var url = window.URL.createObjectURL(blob);
-        var a = document.createElement("a");
-        document.body.appendChild(a);
-        a.href = url;
-        a.download = outputFileName;
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-      }
-    })
-    .catch(function (err) {
-      alert(err.message || err);
-      throw err;
-    });
-}
+  /*
+    入力処理
+    */
 
-// 出力用ファイルの生成
-function generate() {
-  var mappingtable = getMappingTable();
-  return getTemplate()
-    .then(function (workbook) {
-      // シートに書き込み
-      var sheet = workbook.sheet(0);
-      // チケットの基本データ
-      fileds.forEach(function(key) {
-        // 対象のキーがnameプロパティを持っていればその値を、そうでなければ対象のキーの値を出力 //TODO
-        if(mappingtable[key]) sheet.cell(mappingtable[key].toUpperCase()).value(issue[key]['name'] || issue[key]);
-      });
-      // カスタムフィールドのデータ
-      mappingtable.custom_fields.forEach(function(item) {
-        if (item.cell) {
-          // カスタムフィールドIDが一致する配列のみ抽出
-          var cf = issue.custom_fields.filter(function(custom_fields, i) {
-            if (custom_fields.id == item.id) return true;
-          });
-          sheet.cell(item.cell.toUpperCase()).value(cf[0].value);
-        }
-      });
-      return workbook.outputAsync();
-    })
-}
-
-// テンプレートファイルの取得
-function getTemplate() {
-  var templatePath = `${templateDir}/${issue.project.id}/${issue.tracker.id}.xlsx`;
-  return new Promise(function (resolve, reject) {
-    var xhr = new XMLHttpRequest();
-    xhr.open("GET", templatePath, true);
-    xhr.responseType = "arraybuffer";
-    xhr.onreadystatechange = function () {
-      if (xhr.readyState === XMLHttpRequest.DONE){
-        if (xhr.status === 200) {
-          resolve(XlsxPopulate.fromDataAsync(xhr.response));
+  // テンプレート選択オプションの追加
+  function addTemplateSelector() {
+    var template = JSON.parse(core.dataset.template);
+    var options = []
+    if (template.mapping_table) {
+      options.push({text:template.title, value: {}})
+    } else {
+      Object.keys(template).forEach(function(key1) {
+        if (template[key1].mapping_table) {
+            options.push({ text:template[key1].title, value: {project:{id:key1}} })
         } else {
-          reject("Received a " + xhr.status + " HTTP code.");
+          Object.keys(template[key1]).forEach(function(key2) {
+            if (template[key1][key2].mapping_table) {
+              options.push({ text:template[key1][key2].title, value: {project:{id:key1}, tracker:{id:key2}} })
+            }
+          })
         }
-      }
-    };
-    xhr.send();
-  });
-}
+      })
+    }
+    options.forEach(function(item) {
+      var option = document.createElement("option");
+      option.text = item.text;
+      option.value = JSON.stringify(item.value);
+      templateSelector.add(option);
+    });
+  }
+
+  // ファイルを入力
+  function importExcel(e) {
+    getWorkbook(e)
+      .then(function (workbook) {
+        postdata = {
+          'issue' : {}
+        };
+        // シートの読み込み
+        var issue = core.dataset.issue ? JSON.parse(core.dataset.issue).issue : JSON.parse(templateSelector.value);
+        var template = getTemplateInfo(issue.project.id, issue.tracker.id);
+        var table = template.mapping_table;
+        var sheet =workbook.sheet(0);
+        // 基本フィールドのデータ
+        Object.keys(table).forEach(function(key) {
+          if (key == 'custom_fields') return;
+          if (table[key]) {
+            if (table[key].id) {
+              var item = {key: key + '_id', cell: table[key].id};
+            } else {
+              var item = {key: key, cell: table[key]};
+            }
+            if (isCell(item.cell)) postdata.issue[item.key] = sheet.cell(item.cell).value();
+          }
+        });
+        // カスタムフィールドのデータ
+        var custom_fields = [];
+        table.custom_fields.forEach(function(item) {
+          if (isCell(item.cell)) custom_fields.push({"value": sheet.cell(item.cell).value(), "id": item.id});
+        });
+        if(custom_fields) postdata.issue.custom_fields = custom_fields;
+        importedData.value = JSON.stringify(postdata, null, '  ');
+/*
+      })
+      .catch(function (err) {
+        importedData.value = (err.message || err);
+*/
+      });
+  }
+
+  // 入力ファイルの取得
+  function getWorkbook(e) {
+    var file = e.target.files[0];
+    if (!file) return Promise.reject("ファイルを選択してください！");
+    return XlsxPopulate.fromDataAsync(file);
+  }
+
+  // データ送信
+  function postIssue() {
+    var xhr = new XMLHttpRequest();
+    var url = location.href;
+    try{
+      xhr.open("POST", url, true);
+      xhr.setRequestHeader("Content-type", "application/json; charset=utf-8");
+      xhr.onreadystatechange = function () {
+        if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+          importResult.value = `${xhr.responseText}\n${importResult.value}`;
+        }
+      };
+      xhr.send(JSON.stringify(postdata));
+    } catch(e) {
+      console.log(e);
+    }
+  }
+
+  /*
+    出力処理
+    */
+
+  // ファイルを出力
+  function exportExcel() {
+    var filename = JSON.parse(core.dataset.issue).issue.id;
+    return generate()
+      .then(function (blob) {
+        if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+          window.navigator.msSaveOrOpenBlob(blob, `${filename}.xlsx`);
+        } else {
+          var url = window.URL.createObjectURL(blob);
+          var a = document.createElement("a");
+          document.body.appendChild(a);
+          a.href = url;
+          a.download = `${filename}.xlsx`;
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        }
+      })
+      .catch(function (err) {
+        alert(err.message || err);
+        throw err;
+      });
+  }
+
+  // 出力用ファイルの生成
+  function generate() {
+    var issue = JSON.parse(core.dataset.issue).issue;
+    var template = getTemplateInfo(issue.project.id, issue.tracker.id);
+    return getTemplateFile(template.filename)
+      .then(function (workbook) {
+        // シートに書き込み
+        var sheet = workbook.sheet(0);
+        var table = template.mapping_table;
+        // チケットの基本データ
+        Object.keys(table).forEach(function(key) {
+          if (key == 'custom_fields') return;
+          if (table[key]      && isCell(table[key]))       sheet.cell(table[key]).value(issue[key]);
+          if (table[key].id   && isCell(table[key].id))    sheet.cell(table[key].id).value(issue[key].id);
+          if (table[key].name && isCell(table[key].name))  sheet.cell(table[key].name).value(issue[key].name);
+        });
+        // カスタムフィールドのデータ
+        table.custom_fields.forEach(function(item) {
+          if (item.cell && issue.custom_fields) {
+            // カスタムフィールドIDが一致する配列のみ抽出
+            var cf = issue.custom_fields.filter(function(custom_fields, i) {
+              if (custom_fields.id == item.id) return true;
+            });
+            if (isCell(item.cell)) sheet.cell(item.cell).value(cf[0].value);
+          }
+        });
+        return workbook.outputAsync();
+      })
+  }
+
+  // テンプレートファイルの取得
+  function getTemplateFile(filename) {
+    return new Promise(function (resolve, reject) {
+      var xhr = new XMLHttpRequest();
+      xhr.open("GET", `${templateDir}/${filename}`, true);
+      xhr.responseType = "arraybuffer";
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState === XMLHttpRequest.DONE){
+          if (xhr.status === 200) {
+            resolve(XlsxPopulate.fromDataAsync(xhr.response));
+          } else {
+            reject("Received a " + xhr.status + " HTTP code.");
+          }
+        }
+      };
+      xhr.send();
+    });
+  }
+})();

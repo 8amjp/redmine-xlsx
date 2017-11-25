@@ -37,7 +37,7 @@ app.get('/', function(req, res, next) {
 });
 app.route('/redmine/issues/new')
   .get(function(req, res) {
-    res.render('new', { table: JSON.stringify(config.mapping_table) });
+    res.render('new', { template: JSON.stringify(config.template) });
   })
   .post(function(req, res) {
     request({
@@ -50,13 +50,12 @@ app.route('/redmine/issues/new')
       res.send('インポートが完了しました。');
     });
   });
-
 app.route('/redmine/issues/:id(\\d+)')
   .get(function(req, res) {
     request(
       `${redmine.url}issues/${req.params.id}${redmine.format}`,
       function (error, response, body) {
-        res.render('issue', { issue: body, table: JSON.stringify(config.mapping_table) });
+        res.render('issue', { issue: body, template: JSON.stringify(config.template) });
       });
   })
   .post(function(req, res) {
