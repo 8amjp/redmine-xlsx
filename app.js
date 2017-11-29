@@ -7,6 +7,7 @@ var bodyParser = require('body-parser');
 var request = require('request');
 
 var config = require('./config');
+var template = require('./template');
 const redmine = {
   'url'    : 'http://localhost/redmine/',
   'format' : '.json'
@@ -37,7 +38,7 @@ app.get('/', function(req, res, next) {
 });
 app.route('/redmine/issues/new')
   .get(function(req, res) {
-    res.render('new', { template: JSON.stringify(config.template) });
+    res.render('new', { template: JSON.stringify(template) });
   })
   .post(function(req, res) {
     request({
@@ -55,7 +56,7 @@ app.route('/redmine/issues/:id(\\d+)')
     request(
       `${redmine.url}issues/${req.params.id}${redmine.format}`,
       function (error, response, body) {
-        res.render('issue', { issue: body, template: JSON.stringify(config.template) });
+        res.render('issue', { issue: body, template: JSON.stringify(template) });
       });
   })
   .post(function(req, res) {

@@ -29,11 +29,6 @@
     return template[project_id][tracker_id] || template[project_id] || template;
   }
 
-  // セルのアドレスの書式として正しいかどうかを返す
-  function isCell(s) {
-    return /[A-Z]+[0-9]+/.test(s);
-  }
-
   /*
     入力処理
     */
@@ -80,27 +75,22 @@
         // 基本フィールドのデータ
         Object.keys(table).forEach(function(key) {
           if (key == 'custom_fields') return;
-          if (table[key]) {
-            if (table[key].id) {
-              var item = {key: key + '_id', cell: table[key].id};
-            } else {
-              var item = {key: key, cell: table[key]};
-            }
-            if (isCell(item.cell)) postdata.issue[item.key] = sheet.cell(item.cell).value();
+          if ('id' in table[key]) {
+            postdata.issue[key + '_id'] = sheet.cell(table[key].id.cell).value();
+          } else {
+            postdata.issue[key] = sheet.cell(table[key].cell).value();
           }
         });
         // カスタムフィールドのデータ
         var custom_fields = [];
         table.custom_fields.forEach(function(item) {
-          if (isCell(item.cell)) custom_fields.push({"value": sheet.cell(item.cell).value(), "id": item.id});
+          custom_fields.push({"value": sheet.cell(item.cell).value(), "id": item.id});
         });
         if(custom_fields) postdata.issue.custom_fields = custom_fields;
         importedData.value = JSON.stringify(postdata, null, '  ');
-/*
       })
       .catch(function (err) {
         importedData.value = (err.message || err);
-*/
       });
   }
 
@@ -169,9 +159,11 @@
         // チケットの基本データ
         Object.keys(table).forEach(function(key) {
           if (key == 'custom_fields') return;
-          if (table[key]      && isCell(table[key]))       sheet.cell(table[key]).value(issue[key]);
-          if (table[key].id   && isCell(table[key].id))    sheet.cell(table[key].id).value(issue[key].id);
-          if (table[key].name && isCell(table[key].name))  sheet.cell(table[key].name).value(issue[key].name);
+          if (key in issue) {
+            if ('cell' in table[key])                         sheet.cell(table[key].cell).value(issue[key]);
+            if ('id'   in table[key] && 'id'   in issue[key]) sheet.cell(table[key].id.cell).value(issue[key].id);
+            if ('name' in table[key] && 'name' in issue[key]) sheet.cell(table[key].name.cell).value(issue[key].name);
+          }
         });
         // カスタムフィールドのデータ
         table.custom_fields.forEach(function(item) {
@@ -198,7 +190,7 @@
           if (xhr.status === 200) {
             resolve(XlsxPopulate.fromDataAsync(xhr.response));
           } else {
-            reject("Received a " + xhr.status + " HTTP code.");
+            resolve(XlsxPopulate.fromBlankAsync());
           }
         }
       };

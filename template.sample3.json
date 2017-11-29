@@ -1,0 +1,98 @@
+{
+  "1": {
+    "1": {
+      "title" : "Project1/Tracker1",
+      "filename" : "project1/tracker1.xlsx",
+      "mapping_table": {
+        "id" : { "cell": "A1" },
+        "project" : {
+          "id"   : { "cell": "A2" },
+          "name" : { "cell": "B2" }
+        },
+        "tracker" : {
+          "id"   : { "cell": "A3" },
+          "name" : { "cell": "B3" }
+        },
+        "status" : {
+          "id"   : { "cell": "A4" },
+          "name" : { "cell": "B4" }
+        },
+        "priority" : {
+          "id"   : { "cell": "A5" },
+          "name" : { "cell": "B5" }
+        },
+        "author" : {
+          "id"   : { "cell": "A6" },
+          "name" : { "cell": "B6" }
+        },
+        "category" : {
+          "id"   : { "cell": "A7" },
+          "name" : { "cell": "B7" }
+        },
+        "assigned_to" : {
+          "id"   : { "cell": "A8" },
+          "name" : { "cell": "B8" }
+        },
+        "subject"         : { "cell": "A9" },
+        "description"     : { "cell": "A10" },
+        "start_date"      : { "cell": "A11" },
+        "done_ratio"      : { "cell": "A12" },
+        "estimated_hours" : { "cell": "A13" },
+        "created_on"      : { "cell": "A14" },
+        "updated_on"      : { "cell": "A15" },
+        "custom_fields" : [
+          { "id": 1, "cell": "C1" },
+          { "id": 2, "cell": "C2" },
+          { "id": 3, "cell": "C3" }
+        ]
+      }
+    },
+    "2": {
+      "title" : "Project1/Tracker2",
+      "filename" : "project1/tracker2.xlsx",
+      "mapping_table": {
+        "id" : { "cell": "A1" },
+        "project" : {
+          "id"   : { "cell": "A2" },
+          "name" : { "cell": "B2" }
+        },
+        "tracker" : {
+          "id"   : { "cell": "A3" },
+          "name" : { "cell": "B3" }
+        },
+        "status" : {
+          "id"   : { "cell": "A4" },
+          "name" : { "cell": "B4" }
+        },
+        "priority" : {
+          "id"   : { "cell": "A5" },
+          "name" : { "cell": "B5" }
+        },
+        "author" : {
+          "id"   : { "cell": "A6" },
+          "name" : { "cell": "B6" }
+        },
+        "category" : {
+          "id"   : { "cell": "A7" },
+          "name" : { "cell": "B7" }
+        },
+        "assigned_to" : {
+          "id"   : { "cell": "A8" },
+          "name" : { "cell": "B8" }
+        },
+        "subject"         : { "cell": "A9" },
+        "description"     : { "cell": "A10" },
+        "start_date"      : { "cell": "A11" },
+        "done_ratio"      : { "cell": "A12" },
+        "estimated_hours" : { "cell": "A13" },
+        "created_on"      : { "cell": "A14" },
+        "updated_on"      : { "cell": "A15" },
+        "custom_fields" : [
+          { "id": 1, "cell": "C1" },
+          { "id": 2, "cell": "C2" },
+          { "id": 3, "cell": "C3" }
+        ]
+      }
+    }
+  }
+}
