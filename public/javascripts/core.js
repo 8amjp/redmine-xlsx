@@ -172,7 +172,7 @@
             var cf = issue.custom_fields.filter(function(custom_fields, i) {
               if (custom_fields.id == item.id) return true;
             });
-            if (isCell(item.cell)) sheet.cell(item.cell).value(cf[0].value);
+            sheet.cell(item.cell).value(cf[0].value);
           }
         });
         return workbook.outputAsync();
