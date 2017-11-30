@@ -7,6 +7,7 @@
   const currentData  = document.getElementById('current-data');
   const importedData = document.getElementById('imported-data');
   const importResult = document.getElementById('import-result');
+  const exportResult = document.getElementById('export-result');
   const templateSelector = document.getElementById('template-selector');
   const templateDir = '/templates';
 
@@ -191,6 +192,7 @@
             resolve(XlsxPopulate.fromDataAsync(xhr.response));
           } else {
             resolve(XlsxPopulate.fromBlankAsync());
+            exportResult.value = 'テンプレートがありません。空白のブックを使用します。';
           }
         }
       };
