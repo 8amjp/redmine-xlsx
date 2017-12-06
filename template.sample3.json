@@ -54,7 +54,7 @@
             { "value" : "1", "cell" : "C3" },
             { "value" : "2", "cell" : "D3" },
             { "value" : "3", "cell" : "E3" }
-          ]}
+          ], "type" : "enumeration" }
         ],
         "created_on" : { "cell" : "A20" },
         "updated_on" : { "cell" : "A21" },
@@ -115,7 +115,7 @@
             { "value" : "1", "cell" : "C3" },
             { "value" : "2", "cell" : "D3" },
             { "value" : "3", "cell" : "E3" }
-          ]}
+          ], "type" : "enumeration" }
         ],
         "created_on" : { "cell" : "A20" },
         "updated_on" : { "cell" : "A21" },

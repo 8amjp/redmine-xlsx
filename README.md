@@ -55,10 +55,6 @@ Excelファイル(.xlsx)のエクスポートは、事前に用意したテン�
 
 ##### title
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 159ed1d64a67f65ec13f3d6a27abefa5767a8723
 ##### filename
 
 `public/templates` ディレクトリ内の
@@ -75,7 +71,13 @@ Excelファイル(.xlsx)のエクスポートは、事前に用意したテン�
 
 下記のように指定します。
 
-`{ "id" : 3, "cell" : ["C3","D3","E3"], "value" : ["1","2","3"] }`
+```
+{ "id" : 3, "cell" : [
+  { "value" : "1", "cell" : "C3" },
+  { "value" : "2", "cell" : "D3" },
+  { "value" : "3", "cell" : "E3" }
+], "type" : "enumeration"}
+```
 
 `cell`の一番目で指定されたセルの値がtrueの場合、`value`の一番目で指定された値が入力されます。
 
