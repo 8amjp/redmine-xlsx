@@ -25,26 +25,40 @@
           "id"   : { "cell" : "A6" },
           "name" : { "cell" : "B6" }
         },
-        "category" : {
+        "assigned_to" : {
           "id"   : { "cell" : "A7" },
           "name" : { "cell" : "B7" }
         },
-        "assigned_to" : {
+        "category" : {
           "id"   : { "cell" : "A8" },
           "name" : { "cell" : "B8" }
         },
-        "subject"         : { "cell" : "A9" },
-        "description"     : { "cell" : "A10" },
-        "start_date"      : { "cell" : "A11" },
-        "done_ratio"      : { "cell" : "A12" },
-        "estimated_hours" : { "cell" : "A13" },
-        "created_on"      : { "cell" : "A14" },
-        "updated_on"      : { "cell" : "A15" },
+        "fixed_version" : {
+          "id"   : { "cell" : "A9" },
+          "name" : { "cell" : "B9" }
+        },
+        "subject"               : { "cell" : "A10" },
+        "description"           : { "cell" : "A11" },
+        "start_date"            : { "cell" : "A12" },
+        "due_date"              : { "cell" : "A13" },
+        "done_ratio"            : { "cell" : "A14" },
+        "is_private"            : { "cell" : "A15" },
+        "estimated_hours"       : { "cell" : "A16" },
+        "total_estimated_hours" : { "cell" : "A17" },
+        "spent_hours"           : { "cell" : "A18" },
+        "total_spent_hours"     : { "cell" : "A19" },
         "custom_fields" : [
           { "id" : 1, "cell" : "C1" },
-          { "id" : 2, "cell" : "C2" },
-          { "id" : 3, "cell" : "C3" }
-        ]
+          { "id" : 2, "cell" : "C2", "type" : "datetime" },
+          { "id" : 3, "cell" : [
+            { "value" : "1", "cell" : "C3" },
+            { "value" : "2", "cell" : "D3" },
+            { "value" : "3", "cell" : "E3" }
+          ]}
+        ],
+        "created_on" : { "cell" : "A20" },
+        "updated_on" : { "cell" : "A21" },
+        "closed_on"  : { "cell" : "A22" }
       }
     },
     "2" : {
@@ -72,26 +86,40 @@
           "id"   : { "cell" : "A6" },
           "name" : { "cell" : "B6" }
         },
-        "category" : {
+        "assigned_to" : {
           "id"   : { "cell" : "A7" },
           "name" : { "cell" : "B7" }
         },
-        "assigned_to" : {
+        "category" : {
           "id"   : { "cell" : "A8" },
           "name" : { "cell" : "B8" }
         },
-        "subject"         : { "cell" : "A9" },
-        "description"     : { "cell" : "A10" },
-        "start_date"      : { "cell" : "A11" },
-        "done_ratio"      : { "cell" : "A12" },
-        "estimated_hours" : { "cell" : "A13" },
-        "created_on"      : { "cell" : "A14" },
-        "updated_on"      : { "cell" : "A15" },
+        "fixed_version" : {
+          "id"   : { "cell" : "A9" },
+          "name" : { "cell" : "B9" }
+        },
+        "subject"               : { "cell" : "A10" },
+        "description"           : { "cell" : "A11" },
+        "start_date"            : { "cell" : "A12" },
+        "due_date"              : { "cell" : "A13" },
+        "done_ratio"            : { "cell" : "A14" },
+        "is_private"            : { "cell" : "A15" },
+        "estimated_hours"       : { "cell" : "A16" },
+        "total_estimated_hours" : { "cell" : "A17" },
+        "spent_hours"           : { "cell" : "A18" },
+        "total_spent_hours"     : { "cell" : "A19" },
         "custom_fields" : [
           { "id" : 1, "cell" : "C1" },
-          { "id" : 2, "cell" : "C2" },
-          { "id" : 3, "cell" : "C3" }
-        ]
+          { "id" : 2, "cell" : "C2", "type" : "datetime" },
+          { "id" : 3, "cell" : [
+            { "value" : "1", "cell" : "C3" },
+            { "value" : "2", "cell" : "D3" },
+            { "value" : "3", "cell" : "E3" }
+          ]}
+        ],
+        "created_on" : { "cell" : "A20" },
+        "updated_on" : { "cell" : "A21" },
+        "closed_on"  : { "cell" : "A22" }
       }
     }
   }

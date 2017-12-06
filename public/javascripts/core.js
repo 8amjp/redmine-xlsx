@@ -75,20 +75,89 @@
         var sheet =workbook.sheet(0);
         // 基本フィールドのデータ
         Object.keys(table).forEach(function(key) {
-          if (key == 'custom_fields') return;
-          if ('id' in table[key]) {
-            postdata.issue[key + '_id'] = sheet.cell(table[key].id.cell).value();
-          } else {
-            postdata.issue[key] = sheet.cell(table[key].cell).value();
+          switch (key) {
+            // id/nameを持つフィールド
+            case 'project':
+            case 'tracker':
+            case 'status':
+            case 'priority':
+            case 'author':
+            case 'assigned_to':
+            case 'category':
+            case 'fixed_version':
+              // すべて数値型に変換
+              postdata.issue[key + '_id'] = parseInt(sheet.cell(table[key].id.cell).value(), 10);
+              break;
+            // 数値型
+            case 'id':
+            case 'done_ratio':
+            case 'is_private':
+            case 'estimated_hours':
+            case 'total_estimated_hours':
+            case 'spent_hours':
+            case 'total_spent_hours':
+              // 数値型に変換
+              postdata.issue[key] = parseInt(sheet.cell(table[key].cell).value(), 10);
+              break;
+            // テキスト型
+            case 'subject':
+            case 'description':
+              postdata.issue[key] = sheet.cell(table[key].cell).value();
+              break;
+            // 日付型
+            case 'start_date':
+              postdata.issue[key] = moment(sheet.cell(table[key].cell).value()).format('YYYY-MM-DD');
+              break;
+            // 日付と時刻型
+            case 'created_on':
+            case 'updated_on':
+            case 'closed_on':
+              postdata.issue[key] = moment(sheet.cell(table[key].cell).value()).format(moment.ISO_8601);
+              break;
+            case 'custom_fields':
+              // カスタムフィールドのデータ
+              var custom_fields = [];
+              table.custom_fields.forEach(function(item) {
+                var value;
+                switch (item.type) {
+                  // 列挙型
+                  case 'enumeration':
+                    if (Array.isArray(item.cell)) {  // 配列(複数選択可能なキー・バリュー リスト)の場合
+                      value = [];
+                      item.cell.forEach(function(enumeration){
+                        if (sheet.cell(enumeration.cell).value()) value.push(enumeration.value);
+                      });
+                    } else {
+                      value = parseInt(sheet.cell(item.cell).value(), 10);
+                    }
+                    break;
+                  // 日付型
+                  case 'date':
+                  case 'datetime':
+                    var date = sheet.cell(item.cell).value();
+                    if (date) {
+                      date = XlsxPopulate.numberToDate(date);
+                      var format = (item.type == 'date') ? 'YYYY-MM-DD' : 'YYYY-MM-DDTHH:mm:ss';
+                      value = moment(date).format(format);
+                    }
+                    break;
+                  // 数値型/真偽値
+                  case 'int':
+                  case 'bool':
+                    value = parseInt(sheet.cell(item.cell).value(), 10);
+                    break;
+                  // その他(テキスト型)
+                  default:
+                    value = sheet.cell(item.cell).value();
+                }
+                if (value) custom_fields.push({"value": value, "id": item.id});
+              });
+              if(custom_fields) postdata.issue.custom_fields = custom_fields;
+              // 内容の出力
+              importedData.value = JSON.stringify(postdata, null, '  ');
+              break;
           }
         });
-        // カスタムフィールドのデータ
-        var custom_fields = [];
-        table.custom_fields.forEach(function(item) {
-          custom_fields.push({"value": sheet.cell(item.cell).value(), "id": item.id});
-        });
-        if(custom_fields) postdata.issue.custom_fields = custom_fields;
-        importedData.value = JSON.stringify(postdata, null, '  ');
       })
       .catch(function (err) {
         importedData.value = (err.message || err);
@@ -158,22 +227,80 @@
         var sheet = workbook.sheet(0);
         var table = template.mapping_table;
         // チケットの基本データ
-        Object.keys(table).forEach(function(key) {
-          if (key == 'custom_fields') return;
-          if (key in issue) {
-            if ('cell' in table[key])                         sheet.cell(table[key].cell).value(issue[key]);
-            if ('id'   in table[key] && 'id'   in issue[key]) sheet.cell(table[key].id.cell).value(issue[key].id);
-            if ('name' in table[key] && 'name' in issue[key]) sheet.cell(table[key].name.cell).value(issue[key].name);
-          }
-        });
-        // カスタムフィールドのデータ
-        table.custom_fields.forEach(function(item) {
-          if (item.cell && issue.custom_fields) {
-            // カスタムフィールドIDが一致する配列のみ抽出
-            var cf = issue.custom_fields.filter(function(custom_fields, i) {
-              if (custom_fields.id == item.id) return true;
-            });
-            sheet.cell(item.cell).value(cf[0].value);
+        Object.keys(issue).forEach(function(key) {
+          if (!(key in table)) return;
+          switch (key) {
+            // id/nameを持つフィールド
+            case 'project':
+            case 'tracker':
+            case 'status':
+            case 'priority':
+            case 'author':
+            case 'assigned_to':
+            case 'category':
+            case 'fixed_version':
+              if (table[key] && 'cell' in table[key].id)   sheet.cell(table[key].id.cell).value(parseInt(issue[key].id, 10));
+              if (table[key] && 'cell' in table[key].name) sheet.cell(table[key].name.cell).value(issue[key].name);
+              break;
+            // 数値型
+            case 'id':
+            case 'done_ratio':
+            case 'is_private':
+            case 'estimated_hours':
+            case 'total_estimated_hours':
+            case 'spent_hours':
+            case 'total_spent_hours':
+              if ('cell' in table[key]) sheet.cell(table[key].cell).value(parseInt(issue[key], 10));
+              break;
+            // テキスト型
+            case 'subject':
+            case 'description':
+              if ('cell' in table[key]) sheet.cell(table[key].cell).value(issue[key]);
+              break;
+            // 日付型
+            case 'start_date':
+            case 'created_on':
+            case 'updated_on':
+            case 'closed_on':
+              if ('cell' in table[key]) sheet.cell(table[key].cell).value(new Date(issue[key]));
+              break;
+            // カスタムフィールドのデータ
+            case 'custom_fields':
+              table.custom_fields.forEach( function(item) {
+                if (item.cell && issue.custom_fields) {
+                  // カスタムフィールドIDが一致する配列のみ抽出
+                  var cf = issue.custom_fields.filter( function(custom_fields) {
+                    if (custom_fields.id == item.id) return true;
+                  });
+                  var value = cf[0].value;
+                  switch (item.type) {
+                    // 列挙型
+                    case 'enumeration':
+                      if (Array.isArray(value)) {  // 複数選択可能なキー・バリュー リストの場合
+                        item.cell.forEach( function(enumeration) {
+                          sheet.cell(enumeration.cell).value(value.includes(enumeration.value) ? 1 : 0);
+                        });
+                      } else {  // それ以外(真偽値)
+                        sheet.cell(item.cell).value(parseInt(value, 10));
+                      }
+                      break;
+                    // 日付型
+                    case 'date':
+                    case 'datetime':
+                      if (value) sheet.cell(item.cell).value(new Date(value));
+                      break;
+                    // 数値型/真偽値
+                    case 'int':
+                    case 'bool':
+                      sheet.cell(item.cell).value(parseInt(value, 10));
+                      break;
+                    // その他(テキスト型)
+                    default:
+                      sheet.cell(item.cell).value(value);
+                  }
+                }
+              });
+              break;
           }
         });
         return workbook.outputAsync();
