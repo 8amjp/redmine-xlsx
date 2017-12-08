@@ -122,7 +122,7 @@
                 switch (item.type) {
                   // 列挙型
                   case 'enumeration':
-                    if (Array.isArray(item.cell)) {  // 配列(複数選択可能なキー・バリュー リスト)の場合
+                    if (item.multiple) {  // 複数選択可能なキー・バリュー リストの場合
                       value = [];
                       item.cell.forEach(function(enumeration){
                         if (sheet.cell(enumeration.cell).value()) value.push(enumeration.value);
@@ -272,31 +272,30 @@
                   var cf = issue.custom_fields.filter( function(custom_fields) {
                     if (custom_fields.id == item.id) return true;
                   });
-                  var value = cf[0].value;
                   switch (item.type) {
                     // 列挙型
                     case 'enumeration':
-                      if (Array.isArray(value)) {  // 複数選択可能なキー・バリュー リストの場合
+                      if (cf[0].multiple) {  // 複数選択可能なキー・バリュー リストの場合
                         item.cell.forEach( function(enumeration) {
-                          sheet.cell(enumeration.cell).value(value.includes(enumeration.value) ? 1 : 0);
+                          sheet.cell(enumeration.cell).value(cf[0].value.includes(enumeration.value) ? 1 : 0);
                         });
                       } else {  // それ以外(真偽値)
-                        sheet.cell(item.cell).value(parseInt(value, 10));
+                        sheet.cell(item.cell).value(parseInt(cf[0].value, 10));
                       }
                       break;
                     // 日付型
                     case 'date':
                     case 'datetime':
-                      if (value) sheet.cell(item.cell).value(new Date(value));
+                      if (cf[0].value) sheet.cell(item.cell).value(new Date(cf[0].value));
                       break;
                     // 数値型/真偽値
                     case 'int':
                     case 'bool':
-                      sheet.cell(item.cell).value(parseInt(value, 10));
+                      sheet.cell(item.cell).value(parseInt(cf[0].value, 10));
                       break;
                     // その他(テキスト型)
                     default:
-                      sheet.cell(item.cell).value(value);
+                      sheet.cell(item.cell).value(cf[0].value);
                   }
                 }
               });
