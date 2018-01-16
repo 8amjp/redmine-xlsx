@@ -6,19 +6,17 @@ block title
 block content
   .container
     .row
-      .col-md-6.py-3
+      .col-6.py-3
         h1 Import New Ticket
         p.lead 新しいチケットを登録します。
+      .col-6.py-3
+        include block-template
+    hr
     .row
-      .col-md-6.py-3
-        .card.border-success
-          .card-body
-            h4.card-title.text-success Select Mapping Table
-            .form-group
-              label(for='template-selector') マッピングテーブルを選択します。
-              select#template-selector.form-control
-      .col-md-6.py-3
-        include import
+      .col-4.py-3
+        include block-import
+      .col-8.py-3
+        include block-postdata
 
 block additional-script
-  script(src='/javascripts/core.js', id='core', data-template='#{template}')
+  script(src='/javascripts/core.js', id='core', data-postdata='#{postdata}', data-template_name='#{template_name}', data-mapping_table='#{mapping_table}')

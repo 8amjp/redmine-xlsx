@@ -6,18 +6,18 @@ block title
 block content
   .container
     .row
-      .col-md-6.py-3
+      .col-6.py-3
         h1 Import/Export Ticket
         p.lead チケットに対して処理を行います。
-      .col-md-6.py-3
-        .form-group
-          label(for='current-data') 現在のデータ:
-          textarea#current-data.form-control(rows='3', readonly='')
+      .col-6.py-3
+        include block-template
+    hr
     .row
-      .col-md-6.py-3
-        include import
-      .col-md-6.py-3
-        include export
+      .col-4.py-3
+        include block-import
+        include block-export
+      .col-8.py-3
+        include block-postdata
 
 block additional-script
-  script(src='/javascripts/core.js', id='core', data-issue='#{issue}', data-template='#{template}')
+  script(src='/javascripts/core.js', id='core', data-currentdata='#{currentdata}', data-template_name='#{template_name}', data-mapping_table='#{mapping_table}')

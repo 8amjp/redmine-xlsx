@@ -76,7 +76,7 @@ Excelファイル(.xlsx)のエクスポートは、事前に用意したテン�
   { "value" : "1", "cell" : "C3" },
   { "value" : "2", "cell" : "D3" },
   { "value" : "3", "cell" : "E3" }
-], "type" : "enumeration"}
+], "type" : "enumeration", "multiple" : true}
 ```
 
 `cell`の一番目で指定されたセルの値がtrueの場合、`value`の一番目で指定された値が入力されます。

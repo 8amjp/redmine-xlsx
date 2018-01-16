@@ -1,6 +1,5 @@
 {
   "1": {
-    "title" : "Project1",
     "filename" : "project1.xlsx",
     "mapping_table" : {
       "id" : { "cell" : "A1" },
@@ -55,13 +54,13 @@
           { "value" : "3", "cell" : "E3" }
         ], "type" : "enumeration", "multiple" : true }
       ],
-      "created_on" : { "cell" : "A20" },
-      "updated_on" : { "cell" : "A21" },
-      "closed_on"  : { "cell" : "A22" }
+      "created_on"  : { "cell" : "A20" },
+      "updated_on"  : { "cell" : "A21" },
+      "closed_on"   : { "cell" : "A22" },
+      "attachments" : { "cell" : "A23" }
     }
   }
   "2" : {
-    "title" : "Project2",
     "filename" : "project2.xlsx",
     "mapping_table" : {
       "id" : { "cell" : "A1" },
@@ -116,9 +115,10 @@
           { "value" : "3", "cell" : "E3" }
         ], "type" : "enumeration", "multiple" : true }
       ],
-      "created_on" : { "cell" : "A20" },
-      "updated_on" : { "cell" : "A21" },
-      "closed_on"  : { "cell" : "A22" }
+      "created_on"  : { "cell" : "A20" },
+      "updated_on"  : { "cell" : "A21" },
+      "closed_on"   : { "cell" : "A22" },
+      "attachments" : { "cell" : "A23" }
     }
   }
 }

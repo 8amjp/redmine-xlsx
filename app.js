@@ -9,8 +9,9 @@ var request = require('request');
 var config = require('./config');
 var template = require('./template');
 const redmine = {
-  'url'    : 'http://localhost/redmine/',
-  'format' : '.json'
+  'url'       : 'http://localhost/redmine/',
+  'format'    : '.json',
+  'get_param' : '?include=attachments'
 }
 const headers = {
   'Content-Type'      : 'application/json',
@@ -36,9 +37,28 @@ app.use('/node_modules', express.static(__dirname + '/node_modules/'));
 app.get('/', function(req, res, next) {
   res.render('index');
 });
-app.route('/redmine/issues/new')
+app.route('/redmine/issues/new/:project_id(\\d+)/:tracker_id(\\d+)')
   .get(function(req, res) {
-    res.render('new', { template: JSON.stringify(template) });
+    var project_id = req.params.project_id;
+    var tracker_id = req.params.tracker_id;
+    var use_template = ( 
+      template[project_id] && template[project_id][tracker_id] ? template[project_id][tracker_id] :
+      template[project_id] ? template[project_id] :
+      template
+    );
+    var postdata = {
+      'issue' : {
+        'project_id' : project_id,
+        'tracker_id' : tracker_id
+      }
+    }
+    res.render('new', {
+      postdata: JSON.stringify( postdata ),
+      project_id: project_id,
+      tracker_id: tracker_id,
+      template_name: use_template.filename,
+      mapping_table: JSON.stringify( use_template.mapping_table )
+    });
   })
   .post(function(req, res) {
     request({
@@ -48,16 +68,32 @@ app.route('/redmine/issues/new')
       json: true,
       form: req.body
     }, function (error, response, body) {
-      res.send('インポートが完了しました。');
+      res.send(response);
     });
   });
 app.route('/redmine/issues/:id(\\d+)')
   .get(function(req, res) {
-    request(
-      `${redmine.url}issues/${req.params.id}${redmine.format}`,
-      function (error, response, body) {
-        res.render('issue', { issue: body, template: JSON.stringify(template) });
+    request({
+      url: `${redmine.url}issues/${req.params.id}${redmine.format}${redmine.get_param}`,
+      method: 'GET',
+      headers: headers
+    }, function (error, response, body) {
+      var currentdata = JSON.parse(body);
+      var project_id = currentdata.issue.project.id;
+      var tracker_id = currentdata.issue.tracker.id;
+      var use_template = ( 
+        template[project_id] && template[project_id][tracker_id] ? template[project_id][tracker_id] :
+        template[project_id] ? template[project_id] :
+        template
+      );
+      res.render('issue', {
+        currentdata: body,
+        project_id: project_id,
+        tracker_id: tracker_id,
+        template_name: use_template.filename,
+        mapping_table: JSON.stringify( use_template.mapping_table )
       });
+    });
   })
   .post(function(req, res) {
     request({
@@ -67,7 +103,7 @@ app.route('/redmine/issues/:id(\\d+)')
       json: true,
       form: req.body
     }, function (error, response, body) {
-      res.send('インポートが完了しました。');
+      res.send(response);
     });
   });
 

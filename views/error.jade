@@ -6,12 +6,10 @@ block title
 block content
   .container
     .row
-      .col
+      .col.py-3
         .alert.alert-danger(role='alert')
           h4 正しいパラメータを指定してください
           p 指定できるパラメータは下記の通りです:
-          dl.row
-            dt.col-sm-3 issues/(数値)
-            dd.col-sm-9 数値の部分で指定したIDのチケットに対し処理を行います。
-            dt.col-sm-3 issues/new
-            dd.col-sm-9 帳票をインポートして新しいチケットを作成します。
+    .row
+      .col.py-3
+        include block-usage
