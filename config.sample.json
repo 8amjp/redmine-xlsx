@@ -1,3 +1,7 @@
 {
-  "api_key": "0000000000000000000000000000000000000000"
+  "api_key": "0000000000000000000000000000000000000000",
+  "host_name": "http://localhost/redmine/",
+  "include_param": "?include=attachments",
+  "default_project_id": 1,
+  "default_tracker_id": 1
 }

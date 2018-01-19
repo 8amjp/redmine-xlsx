@@ -1,0 +1,39 @@
+.card.border-success
+  h4.card-header Usage
+  .card-body
+    h5.card-title
+      a(href='/issues/1') /issues/1
+    p.card-text ID=1のチケットに対し、インポート・エクスポートを行います。
+    h6 パラメータ
+    dl.row
+      dt.col-sm-2 switch_user
+      dd.col-sm-10 更新者を指定します。未指定の場合は`api_key`に対応するユーザーになります。
+    h6 例
+    dl
+      dt
+        a(href='/issues/1?switch_user=user') /issues/1?switch_user=user
+      dd ID=1のチケットの更新者を`user`に設定し、インポート・エクスポートを行います。
+
+    hr
+
+    h5.card-title
+      a(href='/issues/new') /issues/new
+    p.card-text 帳票をインポートし、新しいチケットを作成します。
+    h6 パラメータ
+    dl.row
+      dt.col-sm-2 project_id
+      dd.col-sm-10 プロジェクトIDを指定します。未指定の場合は`default_project_id`の値になります。
+      dt.col-sm-2 tracker_id
+      dd.col-sm-10 トラッカーIDを指定します。未指定の場合は`default_tracker_id`の値になります。
+      dt.col-sm-2 switch_user
+      dd.col-sm-10 起票者を指定します。未指定の場合は`api_key`に対応するユーザーになります。
+    h6 例
+    dl
+      dt
+        a(href='/issues/new?project_id=1&tracker_id=2&switch_user=user') /issues/new?project_id=1&tracker_id=2&switch_user=user
+      dd 帳票をプロジェクトID=`1`、トラッカーID=`2`、起票者=`user`としてインポートし、新しいチケットを作成します。
+
+    hr
+
+    .alert.alert-warning 該当するプロジェクトIDおよびトラッカーIDのテンプレートが用意されていないとエラーになります。
+

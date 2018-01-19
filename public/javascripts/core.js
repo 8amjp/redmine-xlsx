@@ -7,6 +7,7 @@
   const Promise = XlsxPopulate.Promise;
   const core = document.getElementById('core');
   const templateDir = '/templates';
+  const format = '.json';
 
   // イベントの追加
   if(document.getElementById('file-input'))    document.getElementById('file-input').addEventListener('change', importExcel, false);
@@ -14,18 +15,26 @@
   if(document.getElementById('export-submit')) document.getElementById('export-submit').addEventListener('click', exportExcel, false);
 
   // `postdata`の初期化
-  var postdata = { 'issue' : {} };
+  var postdata = {
+    'issue' : {}
+  };
   if(core.dataset.postdata) postdata = JSON.parse(core.dataset.postdata);
+
+  // リクエストヘッダの設定
+  var requestheaders = {
+    'Content-type': 'application/json'
+  };
+  if(core.dataset.switch_user) requestheaders['X-Redmine-Switch-User'] = core.dataset.switch_user;
 
   // ファイルを入力
   function importExcel(e) {
     getWorkbook(e)
       .then(function (workbook) {
         // シートの読み込み
-        var mapping_table = JSON.parse(core.dataset.mapping_table);
-        var sheet =workbook.sheet(0);
+        let map = JSON.parse(core.dataset.template).mapping_table;
+        let sheet =workbook.sheet(0);
         // 基本フィールドのデータ
-        Object.keys(mapping_table).forEach(function(key) {
+        Object.keys(map).forEach(function(key) {
           switch (key) {
             // id/nameを持つフィールド
             case 'project':
@@ -37,7 +46,7 @@
             case 'category':
             case 'fixed_version':
               // すべて数値型に変換
-              postdata.issue[key + '_id'] = parseInt(sheet.cell(mapping_table[key].id.cell).value(), 10);
+              postdata.issue[key + '_id'] = parseInt(sheet.cell(map[key].id.cell).value(), 10);
               break;
             // 数値型
             case 'id':
@@ -48,31 +57,31 @@
             case 'spent_hours':
             case 'total_spent_hours':
               // 数値型に変換
-              postdata.issue[key] = parseInt(sheet.cell(mapping_table[key].cell).value(), 10);
+              postdata.issue[key] = parseInt(sheet.cell(map[key].cell).value(), 10);
               break;
             // テキスト型
             case 'subject':
             case 'description':
-              postdata.issue[key] = sheet.cell(mapping_table[key].cell).value();
+              postdata.issue[key] = sheet.cell(map[key].cell).value();
               break;
             // 日付型
             case 'start_date':
             case 'due_date':
-              var date = sheet.cell(mapping_table[key].cell).value();
+              var date = sheet.cell(map[key].cell).value();
               if (date) postdata.issue[key] = moment(XlsxPopulate.numberToDate(date)).format('YYYY-MM-DD');
               break;
             // 日付と時刻型
             case 'created_on':
             case 'updated_on':
             case 'closed_on':
-              var date = sheet.cell(mapping_table[key].cell).value();
+              var date = sheet.cell(map[key].cell).value();
               if (date) postdata.issue[key] = moment(XlsxPopulate.numberToDate(date)).format(moment.ISO_8601);
               break;
             case 'custom_fields':
               // カスタムフィールドのデータ
               var custom_fields = [];
-              mapping_table.custom_fields.forEach(function(item) {
-                var value;
+              var value;
+              map.custom_fields.forEach(function(item) {
                 switch (item.type) {
                   // 列挙型
                   case 'enumeration':  // キー・バリュー リスト
@@ -104,6 +113,7 @@
                   // その他(テキスト型)
                   default:
                     value = sheet.cell(item.cell).value();
+                    break;
                 }
                 if (value) custom_fields.push({"value": value, "id": item.id});
               });
@@ -126,19 +136,21 @@
 
   // 入力ファイルの取得
   function getWorkbook(e) {
-    var file = e.target.files[0];
+    let file = e.target.files[0];
     if (!file) return Promise.reject("ファイルを選択してください！");
     return XlsxPopulate.fromDataAsync(file);
   }
 
   // データ送信
   function postIssue() {
-    var xhr = new XMLHttpRequest();
-    var url = location.href;
+    let xhr = new XMLHttpRequest();
+    let url = location.pathname;
     try {
       xhr.open('POST', url, true);
       xhr.responseType = "json";
-      xhr.setRequestHeader('Content-type', 'application/json; charset=utf-8');
+      Object.keys(requestheaders).forEach(function(key) {
+        xhr.setRequestHeader(key, requestheaders[key]);
+      });
       xhr.onreadystatechange = function () {
         if(xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
           showImportResult(null, xhr.response);
@@ -156,14 +168,14 @@
 
   // ファイルを出力
   function exportExcel() {
-    var filename = JSON.parse(core.dataset.currentdata).issue.id;
+    let filename = JSON.parse(core.dataset.currentdata).issue.id;
     return generate()
       .then(function (blob) {
         if (window.navigator && window.navigator.msSaveOrOpenBlob) {
           window.navigator.msSaveOrOpenBlob(blob, `${filename}.xlsx`);
         } else {
-          var url = window.URL.createObjectURL(blob);
-          var a = document.createElement("a");
+          let url = window.URL.createObjectURL(blob);
+          let a = document.createElement("a");
           document.body.appendChild(a);
           a.href = url;
           a.download = `${filename}.xlsx`;
@@ -180,15 +192,15 @@
 
   // 出力用ファイルの生成
   function generate() {
-    var issue = JSON.parse(core.dataset.currentdata).issue;
-    return getTemplateFile(core.dataset.template_name)
+    let issue = JSON.parse(core.dataset.currentdata).issue;
+    return getTemplateFile(JSON.parse(core.dataset.template).filename)
       .then(function (workbook) {
         // シートに書き込み
-        var sheet = workbook.sheet(0);
-        var mapping_table = JSON.parse(core.dataset.mapping_table);
+        let sheet = workbook.sheet(0);
+        let map = JSON.parse(core.dataset.template).mapping_table;
         // チケットの基本データ
         Object.keys(issue).forEach(function(key) {
-          if (!(key in mapping_table)) return;
+          if (!(key in map)) return;
           switch (key) {
             // id/nameを持つフィールド
             case 'project':
@@ -199,8 +211,8 @@
             case 'assigned_to':
             case 'category':
             case 'fixed_version':
-              if (mapping_table[key] && 'cell' in mapping_table[key].id)   sheet.cell(mapping_table[key].id.cell).value(parseInt(issue[key].id, 10));
-              if (mapping_table[key] && 'cell' in mapping_table[key].name) sheet.cell(mapping_table[key].name.cell).value(issue[key].name);
+              if (map[key] && 'cell' in map[key].id)   sheet.cell(map[key].id.cell).value(parseInt(issue[key].id, 10));
+              if (map[key] && 'cell' in map[key].name) sheet.cell(map[key].name.cell).value(issue[key].name);
               break;
             // 数値型
             case 'id':
@@ -210,12 +222,12 @@
             case 'total_estimated_hours':
             case 'spent_hours':
             case 'total_spent_hours':
-              if ('cell' in mapping_table[key]) sheet.cell(mapping_table[key].cell).value(parseInt(issue[key], 10));
+              if ('cell' in map[key]) sheet.cell(map[key].cell).value(parseInt(issue[key], 10));
               break;
             // テキスト型
             case 'subject':
             case 'description':
-              if ('cell' in mapping_table[key]) sheet.cell(mapping_table[key].cell).value(issue[key]);
+              if ('cell' in map[key]) sheet.cell(map[key].cell).value(issue[key]);
               break;
             // 日付型
             case 'start_date':
@@ -223,11 +235,11 @@
             case 'created_on':
             case 'updated_on':
             case 'closed_on':
-              if ('cell' in mapping_table[key]) sheet.cell(mapping_table[key].cell).value(new Date(issue[key]));
+              if ('cell' in map[key]) sheet.cell(map[key].cell).value(new Date(issue[key]));
               break;
             // カスタムフィールドのデータ
             case 'custom_fields':
-              mapping_table.custom_fields.forEach( function(item) {
+              map.custom_fields.forEach( function(item) {
                 if (item.cell && issue.custom_fields) {
                   // カスタムフィールドIDが一致する配列のみ抽出
                   var cf = issue.custom_fields.filter( function(custom_fields) {
@@ -264,12 +276,12 @@
               break;
             // 添付ファイル
             case 'attachments':
-              if ('cell' in mapping_table.attachments) {
+              if ('cell' in map.attachments) {
                 var attachments = [];
                 issue.attachments.forEach( function(attachment) {
                   attachments.push(attachment.filename);
                 });
-                sheet.cell(mapping_table.attachments.cell).value(attachments.join('\n'));
+                sheet.cell(map.attachments.cell).value(attachments.join('\n'));
               }
               break;
           }
@@ -322,23 +334,34 @@
 
   // インポート結果を表示
   function showImportResult(error, response) {
+    let url = core.dataset.host_name;
+    let id;
     if (error) {
-      importResult.appendChild( this.createAlert( 'alert-danger', error ));
+      importResult.appendChild( createAlert( 'alert-danger', error ));
     }
     if (response) {
+      // URL取得
       switch (response.statusCode) {
         case 200: // OK
-          importResult.appendChild( this.createAlert( 'alert-success', 'インポートが完了しました。' ));
+          id = JSON.parse(core.dataset.currentdata).issue.id;
+          importResult.appendChild( createAlert( 'alert-success',
+            `インポートが完了しました。<br><a href="${url}issues/${id}" class="alert-link">このチケットに移動する</a>`
+          ));
           break;
         case 201: // Created
-          importResult.appendChild( this.createAlert( 'alert-success', `新しいチケット#<strong>${response.body.issue.id}</strong>が作成されました。` ));
+          // URL取得
+          id = response.body.issue.id;
+          importResult.appendChild( createAlert( 'alert-success',
+            `新しいチケット#<a href="${url}issues/${id}" class="alert-link">${id}</a>が作成されました。<br><a href="${url}issues/${id}" class="alert-link">このチケットに移動する</a>`
+          ));
           break;
         case 422: // Unprocessable Entity
           response.body.errors.forEach(function(message) {
-            importResult.appendChild( this.createAlert( 'alert-danger', message ));
+            importResult.appendChild( createAlert( 'alert-danger', message ));
           });
+          break;
         default:
-          importResult.appendChild( this.createAlert( 'alert-info', response.body ));
+          importResult.appendChild( createAlert( 'alert-info', response.body ));
           break;
       }
     }
@@ -346,8 +369,13 @@
 
   // エクスポート結果を表示
   function showExportResult(status) {
-    if (status != 200) {
-      exportResult.appendChild( this.createAlert( 'alert-warning', 'テンプレートがありません。空白のブックを使用します。' ));
+    switch (status) {
+      case 200: // OK
+        exportResult.appendChild( createAlert( 'alert-success', 'エクスポートが完了しました。' ));
+        break;
+      default:
+        exportResult.appendChild( createAlert( 'alert-warning', 'テンプレートがありません。空白のブックを使用します。' ));
+        break;
     }
   }
 
@@ -365,7 +393,7 @@
     Object.keys(issue).forEach(function(key) {
       switch (key) {
         case 'custom_fields':
-          issue[key].forEach(function(item) {
+          issue.custom_fields.forEach(function(item) {
             var currentvalue = document.getElementById(`currentdata_cf_${item.id}`);
             if(currentvalue) currentvalue.value = item.value;
           });
@@ -390,7 +418,7 @@
     Object.keys(issue).forEach(function(key) {
       switch (key) {
         case 'custom_fields':
-          issue[key].forEach(function(item) {
+          issue.custom_fields.forEach(function(item) {
             var postvalue    = document.getElementById(`postdata_cf_${item.id}`);
             var currentvalue = document.getElementById(`currentdata_cf_${item.id}`);
             if (postvalue) postvalue.value = item.value;

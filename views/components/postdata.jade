@@ -1,11 +1,11 @@
 table.table.table-sm
   thead
     tr.row
-      th.col-2(scope='col') #
+      th.col-2(scope='col') キー
       th.col-5(scope='col') 現在のデータ
       th.col-5(scope='col') 読み込まれたデータ
   tbody
-    each item, key in JSON.parse(mapping_table)
+    each item, key in JSON.parse(template).mapping_table
       case key
         when 'custom_fields'
           each cf in item

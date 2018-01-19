@@ -7,16 +7,24 @@ var bodyParser = require('body-parser');
 var request = require('request');
 
 var config = require('./config');
-var template = require('./template');
-const redmine = {
-  'url'       : 'http://localhost/redmine/',
-  'format'    : '.json',
-  'get_param' : '?include=attachments'
+config.host_name = config.host_name || 'http://localhost/redmine/';
+var components = config.host_name.match(/^(.+?):\/\/([0-9a-zA-Z-_\.]+):?(\d+)?(\/.*)?$/);
+config.redmine_protocol = components[1];
+config.redmine_hostname = components[2];
+config.redmine_port = (components[3] === undefined ? '' : `:${components[3]}`);
+config.redmine_pathname = components[4];
+config.api_url = `${config.redmine_protocol}://localhost${config.redmine_port}${config.redmine_pathname}`
+config.include_param = config.include_param || '';
+config.default_project_id = config.default_project_id || 1;
+config.default_tracker_id = config.default_tracker_id || 1;
+
+var headers = {
+  'Content-Type': 'application/json',
+  'X-Redmine-API-Key': config.api_key
 }
-const headers = {
-  'Content-Type'      : 'application/json',
-  'X-Redmine-API-Key' : config.api_key
-}
+
+const template = require('./template');
+const format = '.json';
 
 var app = express();
 
@@ -37,10 +45,11 @@ app.use('/node_modules', express.static(__dirname + '/node_modules/'));
 app.get('/', function(req, res, next) {
   res.render('index');
 });
-app.route('/redmine/issues/new/:project_id(\\d+)/:tracker_id(\\d+)')
+app.route('/issues/new')
   .get(function(req, res) {
-    var project_id = req.params.project_id;
-    var tracker_id = req.params.tracker_id;
+    var project_id = req.query.project_id || config.default_project_id;
+    var tracker_id = req.query.tracker_id || config.default_tracker_id;
+    var switch_user = req.query.switch_user || '';
     var use_template = ( 
       template[project_id] && template[project_id][tracker_id] ? template[project_id][tracker_id] :
       template[project_id] ? template[project_id] :
@@ -53,16 +62,20 @@ app.route('/redmine/issues/new/:project_id(\\d+)/:tracker_id(\\d+)')
       }
     }
     res.render('new', {
-      postdata: JSON.stringify( postdata ),
+      postdata: JSON.stringify(postdata),
+      template: JSON.stringify(use_template),
+      host_name: config.host_name,
+      switch_user: switch_user,
       project_id: project_id,
-      tracker_id: tracker_id,
-      template_name: use_template.filename,
-      mapping_table: JSON.stringify( use_template.mapping_table )
+      tracker_id: tracker_id
     });
   })
   .post(function(req, res) {
+    if (req.headers['X-Redmine-Switch-User'] || req.headers['x-redmine-switch-user']) {
+      headers['X-Redmine-Switch-User'] = req.headers['X-Redmine-Switch-User'] || req.headers['x-redmine-switch-user'];
+    };
     request({
-      url: `${redmine.url}issues${redmine.format}`,
+      url: `${config.api_url}issues${format}`,
       method: 'POST',
       headers: headers,
       json: true,
@@ -71,16 +84,17 @@ app.route('/redmine/issues/new/:project_id(\\d+)/:tracker_id(\\d+)')
       res.send(response);
     });
   });
-app.route('/redmine/issues/:id(\\d+)')
+app.route('/issues/:id(\\d+)')
   .get(function(req, res) {
     request({
-      url: `${redmine.url}issues/${req.params.id}${redmine.format}${redmine.get_param}`,
+      url: `${config.api_url}issues/${req.params.id}${format}${config.include_param}`,
       method: 'GET',
       headers: headers
     }, function (error, response, body) {
       var currentdata = JSON.parse(body);
       var project_id = currentdata.issue.project.id;
       var tracker_id = currentdata.issue.tracker.id;
+      var switch_user = req.query.switch_user || '';
       var use_template = ( 
         template[project_id] && template[project_id][tracker_id] ? template[project_id][tracker_id] :
         template[project_id] ? template[project_id] :
@@ -88,16 +102,20 @@ app.route('/redmine/issues/:id(\\d+)')
       );
       res.render('issue', {
         currentdata: body,
+        template: JSON.stringify(use_template),
+        host_name: config.host_name,
+        switch_user: switch_user,
         project_id: project_id,
-        tracker_id: tracker_id,
-        template_name: use_template.filename,
-        mapping_table: JSON.stringify( use_template.mapping_table )
+        tracker_id: tracker_id
       });
     });
   })
   .post(function(req, res) {
+    if (req.headers['X-Redmine-Switch-User'] || req.headers['x-redmine-switch-user']) {
+      headers['X-Redmine-Switch-User'] = req.headers['X-Redmine-Switch-User'] || req.headers['x-redmine-switch-user'];
+    };
     request({
-      url: `${redmine.url}issues/${req.params.id}${redmine.format}`,
+      url: `${config.api_url}issues/${req.params.id}${format}`,
       method: 'PUT',
       headers: headers,
       json: true,

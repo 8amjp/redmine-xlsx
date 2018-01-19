@@ -10,14 +10,14 @@ block content
         h1 Import/Export Ticket
         p.lead チケットに対して処理を行います。
       .col-6.py-3
-        include block-template
+        include components/template
     hr
     .row
       .col-4.py-3
-        include block-import
-        include block-export
+        include components/import
+        include components/export
       .col-8.py-3
-        include block-postdata
+        include components/postdata
 
 block additional-script
-  script(src='/javascripts/core.js', id='core', data-currentdata='#{currentdata}', data-template_name='#{template_name}', data-mapping_table='#{mapping_table}')
+  script(src='/javascripts/core.js', id='core', data-currentdata='#{currentdata}', data-template='#{template}', data-switch_user='#{switch_user}', data-host_name='#{host_name}')

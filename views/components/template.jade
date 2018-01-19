@@ -1,0 +1,18 @@
+table.table.table-sm#block-targettable
+  thead
+    tr.row
+      th.col-3(scope='col') キー
+      th.col-9(scope='col') データ
+  tbody
+    tr.row
+      th.col-3 Template:
+      td.col-9 #{JSON.parse(template).filename}
+    tr.row
+      th.col-3 Project ID:
+      td.col-9 #{project_id}
+    tr.row
+      th.col-3 Tracker ID:
+      td.col-9 #{tracker_id}
+    tr.row
+      th.col-3 User:
+      td.col-9 #{switch_user}

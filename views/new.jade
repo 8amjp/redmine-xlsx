@@ -10,13 +10,13 @@ block content
         h1 Import New Ticket
         p.lead 新しいチケットを登録します。
       .col-6.py-3
-        include block-template
+        include components/template
     hr
     .row
       .col-4.py-3
-        include block-import
+        include components/import
       .col-8.py-3
-        include block-postdata
+        include components/postdata
 
 block additional-script
-  script(src='/javascripts/core.js', id='core', data-postdata='#{postdata}', data-template_name='#{template_name}', data-mapping_table='#{mapping_table}')
+  script(src='/javascripts/core.js', id='core', data-postdata='#{postdata}', data-template='#{template}', data-switch_user='#{switch_user}', data-host_name='#{host_name}')
