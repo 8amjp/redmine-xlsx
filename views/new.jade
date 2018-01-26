@@ -6,17 +6,20 @@ block title
 block content
   .container
     .row
-      .col-6.py-3
+      .col-md-6.py-3
         h1 Import New Ticket
         p.lead 新しいチケットを登録します。
-      .col-6.py-3
+      .col-md-6.py-3
         include components/template
     hr
     .row
-      .col-4.py-3
-        include components/import
-      .col-8.py-3
+      .col-md-8.order-md-1.order-sm-2.py-3
         include components/postdata
+      .col-md-4.order-md-2.order-sm-1.py-3
+        include components/import
 
 block additional-script
-  script(src='/javascripts/core.js', id='core', data-postdata='#{postdata}', data-template='#{template}', data-switch_user='#{switch_user}', data-host_name='#{host_name}')
+  script(src='/javascripts/xlsx.js')
+  script(src='/javascripts/core.js', id='core',
+    data-json='#{JSON.stringify(json)}',
+    data-host_name='#{host_name}')

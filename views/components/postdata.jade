@@ -1,25 +1,26 @@
-table.table.table-sm
-  thead
-    tr.row
-      th.col-2(scope='col') キー
-      th.col-5(scope='col') 現在のデータ
-      th.col-5(scope='col') 読み込まれたデータ
-  tbody
-    each item, key in JSON.parse(template).mapping_table
-      case key
-        when 'custom_fields'
-          each cf in item
-            tr.row
-              th.col-2 cf_#{cf.id}:
-              td.col-5
-                textarea.form-control.form-control-sm.currentdata(id=`currentdata_cf_${cf.id}`, rows='1')
-              td.col-5
-                textarea.form-control.form-control-sm.postdata(id=`postdata_cf_${cf.id}`, rows='1')
-        default
-          tr.row
-            - var id = (item.id ? `${key}_id` : key);
-            th.col-2 #{id}:
-            td.col-5
-              textarea.form-control.form-control-sm.currentdata(id=`currentdata_${id}`, rows='1')
-            td.col-5
-              textarea.form-control.form-control-sm.postdata(id=`postdata_${id}`, rows='1')
+form
+  .row
+    .col-md-3 キー
+    .col-md 現在のデータ
+    .col-md 読み込まれたデータ
+  each item, key in json.template.mapping_table
+    case key
+      when 'custom_fields'
+        h6 カスタムフィールド:
+        each cf in item
+          .form-row.py-1
+            label.col-md-3.col-form-label.col-form-label-sm(for='currentdata_cf_#{cf.id}') (#{cf.id}):
+              - var custom_field_name = (custom_fields.length > 0) ? custom_fields.filter( function(e) { return (e.id == cf.id); })[0].name : '';
+              small.text-muted #{custom_field_name}
+            .col-md
+              textarea.form-control.form-control-sm.currentdata(id='currentdata_cf_#{cf.id}', rows='1')
+            .col-md
+              textarea.form-control.form-control-sm.postdata(id='postdata_cf_#{cf.id}', rows='1')
+      default
+        .form-row.py-1
+          - var id = (item.id ? `${key}_id` : key);
+          label.col-md-3.col-form-label.col-form-label-sm(for='currentdata_#{id}') #{id}:
+          .col-md
+            textarea.form-control.form-control-sm.currentdata(id='currentdata_#{id}', rows='1')
+          .col-md
+            textarea.form-control.form-control-sm.postdata(id='postdata_#{id}', rows='1')

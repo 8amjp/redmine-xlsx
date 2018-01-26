@@ -1,39 +1,15 @@
 {
-  "filename" : "template.xlsx",
+  "filename" : "/templates/template.xlsx",
   "mapping_table" : {
     "id" : { "cell" : "A1" },
-    "project" : {
-      "id"   : { "cell" : "A2" },
-      "name" : { "cell" : "B2" }
-    },
-    "tracker" : {
-      "id"   : { "cell" : "A3" },
-      "name" : { "cell" : "B3" }
-    },
-    "status" : {
-      "id"   : { "cell" : "A4" },
-      "name" : { "cell" : "B4" }
-    },
-    "priority" : {
-      "id"   : { "cell" : "A5" },
-      "name" : { "cell" : "B5" }
-    },
-    "author" : {
-      "id"   : { "cell" : "A6" },
-      "name" : { "cell" : "B6" }
-    },
-    "assigned_to" : {
-      "id"   : { "cell" : "A7" },
-      "name" : { "cell" : "B7" }
-    },
-    "category" : {
-      "id"   : { "cell" : "A8" },
-      "name" : { "cell" : "B8" }
-    },
-    "fixed_version" : {
-      "id"   : { "cell" : "A9" },
-      "name" : { "cell" : "B9" }
-    },
+    "project" : { "cell" : "A2" },
+    "tracker" : { "cell" : "A3" },
+    "status" : { "cell" : "A4" },
+    "priority" : { "cell" : "A5" },
+    "author" : { "cell" : "A6" },
+    "assigned_to" : { "cell" : "A7" },
+    "category" : { "cell" : "A8" },
+    "fixed_version" : { "cell" : "A9" },
     "subject"               : { "cell" : "A10" },
     "description"           : { "cell" : "A11" },
     "start_date"            : { "cell" : "A12" },
