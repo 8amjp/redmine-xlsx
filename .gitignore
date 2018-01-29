@@ -1,5 +1,5 @@
 node_modules/
 /public/templates/*
 !/public/templates/.gitkeep
-/config.json
-/template.json
+/config/config.json
+/config/template.json

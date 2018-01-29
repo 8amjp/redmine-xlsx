@@ -109,7 +109,8 @@ var xlsx = (function() {
       // 基本フィールドのデータ
       Object.keys(map).forEach(function(key) {
         switch (key) {
-          // author/assigned_to: 読み込み時は無視
+          // id/author/assigned_to: 読み込み時は無視
+          case 'id':
           case 'author':
           case 'assigned_to':
             break;
@@ -128,7 +129,6 @@ var xlsx = (function() {
             }
             break;
           // 数値型
-          case 'id':
           case 'done_ratio':
           case 'is_private':
           case 'estimated_hours':
@@ -220,8 +220,8 @@ var xlsx = (function() {
   function getTemplateFile(filename) {
     return new Promise(function (resolve, reject) {
       var xhr = new XMLHttpRequest();
-      xhr.open("GET", filename, true);
-      xhr.responseType = "arraybuffer";
+      xhr.open('GET', filename, true);
+      xhr.responseType = 'arraybuffer';
       xhr.onreadystatechange = function () {
         if (xhr.readyState === XMLHttpRequest.DONE){
           if (xhr.status === 200) {
