@@ -5,20 +5,21 @@
 var xlsx = (function() {
   const Promise = XlsxPopulate.Promise;
 
-  var _currentdata = {};
-  var _postdata = { 'issue' : {} };
+  var _post = {};  // POST用データ
+  var _issue = {};  // 
+  var _defaults = {};
   var _template = {};
   var _enumerations = {};
   var _outputfilename = 'issue';
 
   return {
     // 現在のデータを設定
-    set currentdata(value) {
-      _currentdata = value;
+    set issue(value) {
+      _issue = value;
     },
-    // ポスト用データを設定
-    set postdata(value) {
-      _postdata = value;
+    // 既定値を設定
+    set defaults(value) {
+      _defaults = value;
     },
     // 
     set template(value) {
@@ -33,14 +34,14 @@ var xlsx = (function() {
     },
     
     // ファイルを入力
-    importExcel: function(e) {
+    importExcel: function(file) {
       return new Promise(function (resolve, reject) {
-        getWorkbook(e)
+        getWorkbook(file)
         .then(function (workbook) {
           parse(workbook);
         })
         .then(function () {
-          resolve(_postdata);
+          resolve(_post);
         })
         .catch(function (reason) {
           reject(reason);
@@ -56,23 +57,22 @@ var xlsx = (function() {
         xhr.open('POST', url, true);
         xhr.responseType = 'json';
         xhr.setRequestHeader('Content-type', 'application/json');
-        xhr.onreadystatechange = function () {
-          if (xhr.readyState === XMLHttpRequest.DONE){
-            if (xhr.status === 200) {
-              resolve(xhr.response);
-            } else {
-              reject(xhr.status);
-            }
+        xhr.onload = () => {
+          if (xhr.status === 200) {
+            resolve(xhr.response);
+          } else {
+            reject(xhr.statusText);
           }
         };
-        xhr.send(JSON.stringify(_postdata));
+        xhr.onerror = () => reject(xhr.statusText);
+        xhr.send(JSON.stringify(_post));
       });
     },
 
     // ファイルを出力
     exportExcel: function() {
       let defaultName = `${_outputfilename}.xlsx`;
-      return generate()
+      generate()
       .then(function (blob) {
         if (window.navigator && window.navigator.msSaveOrOpenBlob) {
           window.navigator.msSaveOrOpenBlob(blob, defaultName);
@@ -95,8 +95,7 @@ var xlsx = (function() {
   }; 
 
   // 入力ファイルの取得
-  function getWorkbook(e) {
-    let file = e.files[0];
+  function getWorkbook(file) {
     if (!file) return Promise.reject('ファイルを選択してください!');
     return XlsxPopulate.fromDataAsync(file);
   }
@@ -104,15 +103,19 @@ var xlsx = (function() {
   // シートを読み込んでポスト用データを作成
   function parse(workbook) {
     return new Promise(function (resolve, reject) {
+      _post = {'issue' : {}};
       let map = _template.mapping_table;
       let sheet = workbook.sheet(0);
       // 基本フィールドのデータ
       Object.keys(map).forEach(function(key) {
         switch (key) {
-          // id/author/assigned_to: 読み込み時は無視
+          // 読み込まないフィールド
           case 'id':
           case 'author':
           case 'assigned_to':
+          case 'created_on':
+          case 'updated_on':
+          case 'closed_on':
             break;
           // id/nameを持つフィールド:リストから一致するidを取得
           case 'project':
@@ -125,7 +128,7 @@ var xlsx = (function() {
               var values = _enumerations[key].filter( function(e) {
                 return (e.name == sheet.cell(map[key].cell).value());
               });
-              if (values.length > 0) _postdata.issue[`${key}_id`] = values[0].id;
+              if (values.length > 0) _post.issue[`${key}_id`] = values[0].id;
             }
             break;
           // 数値型
@@ -137,26 +140,19 @@ var xlsx = (function() {
           case 'total_spent_hours':
             // 数値型に変換
             var value = parseInt(sheet.cell(map[key].cell).value(), 10);
-            if (value) _postdata.issue[key] = value;
+            if (value) _post.issue[key] = value;
             break;
           // テキスト型
           case 'subject':
           case 'description':
             var value = sheet.cell(map[key].cell).value();
-            if (value) _postdata.issue[key] = value;
+            if (value) _post.issue[key] = value;
             break;
           // 日付型
           case 'start_date':
           case 'due_date':
             var date = sheet.cell(map[key].cell).value();
-            if (date) _postdata.issue[key] = moment(XlsxPopulate.numberToDate(date)).format('YYYY-MM-DD');
-            break;
-          // 日付と時刻型
-          case 'created_on':
-          case 'updated_on':
-          case 'closed_on':
-            var date = sheet.cell(map[key].cell).value();
-            if (date) _postdata.issue[key] = moment(XlsxPopulate.numberToDate(date)).format(moment.ISO_8601);
+            if (date) _post.issue[key] = moment(XlsxPopulate.numberToDate(date)).format('YYYY-MM-DD');
             break;
           case 'custom_fields':
             // カスタムフィールドのデータ
@@ -197,13 +193,19 @@ var xlsx = (function() {
               }
               if (value) custom_fields.push({"value": value, "id": item.id});
             });
-            if(custom_fields.length > 0) _postdata.issue.custom_fields = custom_fields;
+            if(custom_fields.length > 0) _post.issue.custom_fields = custom_fields;
             break;
           // 添付ファイル
           case 'attachments':
             break;
         }
       });
+      // 必須項目が未定義の場合は既定値を入力
+      if(!(_post.issue.hasOwnProperty('project_id')))  _post.issue.project_id  = _defaults.project_id  || 1;
+      if(!(_post.issue.hasOwnProperty('tracker_id')))  _post.issue.tracker_id  = _defaults.tracker_id  || 1;
+      if(!(_post.issue.hasOwnProperty('subject')))     _post.issue.subject     = _defaults.subject     || 'New Ticket';
+      if(!(_post.issue.hasOwnProperty('status_id')))   _post.issue.status_id   = _defaults.status_id   || 1;
+      if(!(_post.issue.hasOwnProperty('priority_id'))) _post.issue.priority_id = _defaults.priority_id || 2;
       resolve();
     });
   }
@@ -212,7 +214,7 @@ var xlsx = (function() {
   function generate() {
     return getTemplateFile(_template.filename)
     .then(function (workbook) {
-      return append(workbook);
+      return output(workbook);
     });
   }
 
@@ -222,26 +224,24 @@ var xlsx = (function() {
       var xhr = new XMLHttpRequest();
       xhr.open('GET', filename, true);
       xhr.responseType = 'arraybuffer';
-      xhr.onreadystatechange = function () {
-        if (xhr.readyState === XMLHttpRequest.DONE){
-          if (xhr.status === 200) {
-            resolve(XlsxPopulate.fromDataAsync(xhr.response));
-          } else {
-            resolve(XlsxPopulate.fromBlankAsync());
-          }
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          resolve(XlsxPopulate.fromDataAsync(xhr.response));
+        } else {
+          resolve(XlsxPopulate.fromBlankAsync());
         }
       };
+      xhr.onerror = () => resolve(XlsxPopulate.fromBlankAsync());
       xhr.send();
     });
   }
 
   // 出力用ファイルに書き込み
-  function append(workbook) {
+  function output(workbook) {
     let sheet = workbook.sheet(0);
-    let issue = _currentdata.issue;
     let map = _template.mapping_table;
     // チケットの基本データ
-    Object.keys(issue).forEach(function(key) {
+    Object.keys(_issue).forEach(function(key) {
       if (!(key in map)) return;
       switch (key) {
         // id/nameを持つフィールド:`name`の値を出力
@@ -253,7 +253,7 @@ var xlsx = (function() {
         case 'assigned_to':
         case 'category':
         case 'fixed_version':
-          if ('cell' in map[key]) sheet.cell(map[key].cell).value(issue[key].name);
+          if ('cell' in map[key]) sheet.cell(map[key].cell).value(_issue[key].name);
           break;
         // 数値型
         case 'id':
@@ -263,12 +263,12 @@ var xlsx = (function() {
         case 'total_estimated_hours':
         case 'spent_hours':
         case 'total_spent_hours':
-          if ('cell' in map[key]) sheet.cell(map[key].cell).value(parseInt(issue[key], 10));
+          if ('cell' in map[key]) sheet.cell(map[key].cell).value(parseInt(_issue[key], 10));
           break;
         // テキスト型
         case 'subject':
         case 'description':
-          if ('cell' in map[key]) sheet.cell(map[key].cell).value(issue[key]);
+          if ('cell' in map[key]) sheet.cell(map[key].cell).value(_issue[key]);
           break;
         // 日付型
         case 'start_date':
@@ -276,14 +276,14 @@ var xlsx = (function() {
         case 'created_on':
         case 'updated_on':
         case 'closed_on':
-          if ('cell' in map[key]) sheet.cell(map[key].cell).value(new Date(issue[key]));
+          if ('cell' in map[key]) sheet.cell(map[key].cell).value(new Date(_issue[key]));
           break;
         // カスタムフィールドのデータ
         case 'custom_fields':
           map.custom_fields.forEach( function(item) {
-            if (item.cell && issue.custom_fields) {
+            if (item.cell && _issue.custom_fields) {
               // カスタムフィールドIDが一致する配列のみ抽出
-              var cf = issue.custom_fields.filter( function(custom_fields) {
+              var cf = _issue.custom_fields.filter( function(custom_fields) {
                 if (custom_fields.id == item.id) return true;
               });
               switch (item.type) {
@@ -319,7 +319,7 @@ var xlsx = (function() {
         case 'attachments':
           if ('cell' in map.attachments) {
             var attachments = [];
-            issue.attachments.forEach( function(attachment) {
+            _issue.attachments.forEach( function(attachment) {
               attachments.push(attachment.filename);
             });
             sheet.cell(map.attachments.cell).value(attachments.join('\n'));

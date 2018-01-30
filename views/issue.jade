@@ -4,23 +4,20 @@ block title
   title Import/Export | Redmine Xio
 
 block content
-  .container
-    .row
-      .col-md-6.py-3
-        h1 Import/Export Ticket
-        p.lead チケットに対して処理を行います。
-      .col-md-6.py-3
-        include components/template
-    hr
-    .row
-      .col-md-8.order-md-1.order-sm-2.py-3
-        include components/postdata
-      .col-md-4.order-md-2.order-sm-1.py-3
-        include components/import
-        include components/export
+  .row
+    .col-md-6.py-3
+      h1.text-success Import/Export Ticket
+      p.lead チケット##{json.issue.id}に対して処理を行います。
+    .col-md-6.py-3
+      include components/template
+  hr
+  .row
+    .col-md-8.order-md-1.order-sm-2.py-3
+      include components/postdata
+    .col-md-4.order-md-2.order-sm-1.py-3
+      include components/import
+      include components/export
 
 block additional-script
   script(src='/javascripts/xlsx.js')
-  script(src='/javascripts/core.js', id='core',
-    data-json='#{JSON.stringify(json)}',
-    data-host_name='#{host_name}')
+  script(src='/javascripts/core.js', id='core', data-json='#{JSON.stringify(json)}', data-host_name='#{host_name}')

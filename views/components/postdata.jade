@@ -6,21 +6,18 @@ form
   each item, key in json.template.mapping_table
     case key
       when 'custom_fields'
-        h6 カスタムフィールド:
         each cf in item
           .form-row.py-1
-            label.col-md-3.col-form-label.col-form-label-sm(for='currentdata_cf_#{cf.id}') (#{cf.id}):
-              - var custom_field_name = (custom_fields.length > 0) ? custom_fields.filter( function(e) { return (e.id == cf.id); })[0].name : '';
-              small.text-muted #{custom_field_name}
+            label.col-md-3.col-form-label.col-form-label-sm(for='issue_custom_field_values_#{cf.id}') #{key}(#{cf.id}):
             .col-md
-              textarea.form-control.form-control-sm.currentdata(id='currentdata_cf_#{cf.id}', rows='1')
+              textarea.form-control.form-control-sm.issue(id='issue_custom_field_values_#{cf.id}', rows='1')
             .col-md
-              textarea.form-control.form-control-sm.postdata(id='postdata_cf_#{cf.id}', rows='1')
+              textarea.form-control.form-control-sm.postissue(id='postissue_custom_field_values_#{cf.id}', rows='1')
       default
         .form-row.py-1
           - var id = (item.id ? `${key}_id` : key);
-          label.col-md-3.col-form-label.col-form-label-sm(for='currentdata_#{id}') #{id}:
+          label.col-md-3.col-form-label.col-form-label-sm(for='issue_#{id}') #{id}:
           .col-md
-            textarea.form-control.form-control-sm.currentdata(id='currentdata_#{id}', rows='1')
+            textarea.form-control.form-control-sm.issue(id='issue_#{id}', rows='1')
           .col-md
-            textarea.form-control.form-control-sm.postdata(id='postdata_#{id}', rows='1')
+            textarea.form-control.form-control-sm.postissue(id='postissue_#{id}', rows='1')

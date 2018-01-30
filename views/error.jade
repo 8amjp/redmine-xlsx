@@ -1,15 +1,14 @@
 extends layout
 
 block title
-  title Error
+  title Error | Redmine Xio
 
 block content
-  .container
-    .row
-      .col.py-3
-        .alert.alert-danger(role='alert')
-          h4 正しいパラメータを指定してください
-          p 指定できるパラメータは下記の通りです:
-    .row
-      .col.py-3
-        include components/usage
+  .row
+    .col.py-3
+      .alert.alert-danger(role='alert')
+        h4 正しいパラメータを指定してください
+        p 指定できるパラメータは下記の通りです:
+  .row
+    .col.py-3
+      include components/usage

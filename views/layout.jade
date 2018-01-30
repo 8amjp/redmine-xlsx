@@ -1,17 +1,14 @@
 doctype html
 html
   head
-    block head
-      block title
-        title Redmine Xio
-      block meta
-        meta(name='description', content='')
-        meta(name='keywords', content='')
-      link(rel='stylesheet', href='/node_modules/bootstrap/dist/css/bootstrap.min.css')
+    block title
+      title Redmine Xio
+    meta(name='description', content='')
+    meta(name='keywords', content='')
+    link(rel='stylesheet', href='/node_modules/bootstrap/dist/css/bootstrap.min.css')
   body
-    include components/navbar
-
-    block content
+    .container
+      block content
 
     script(src='/node_modules/jquery/dist/jquery.min.js')
     script(src='/node_modules/bootstrap/dist/js/bootstrap.min.js')

@@ -18,9 +18,9 @@ var template = require('../config/template');
 
 var locals = {
   'json': {
-    'currentdata': {},
-    'postdata': {},
+    'issue': {},
     'template': {},
+    'defaults': {},
     'projects': {},
     'trackers': {},
     'issue_statuses': {},
@@ -30,7 +30,6 @@ var locals = {
   },
   'project': {},
   'trackers': {},
-  'custom_fields': {},
   'host_name': config.host_name,
   'switch_user': ''
 };
@@ -81,15 +80,6 @@ router.use('/', function (req, res, next) {
     })
     .catch(function(err){
       console.log(new Date(), 'get /enumerations/issue_priorities: failed.'); //// console.log
-    }),
-    // custom_fields
-    request({ url: `${config.api_url}custom_fields${format}`, headers: headers, json: true })
-    .then(function (data) {
-      locals.custom_fields = data.custom_fields;
-      console.log(new Date(), 'get /custom_fields: done.'); //// console.log
-    })
-    .catch(function(err){
-      console.log(new Date(), 'get /custom_fields: failed.'); //// console.log
     })
   ]).then(function(){
     next();
@@ -101,12 +91,10 @@ router.route('/new')
 .get(function(req, res) {
   let project_id = req.query.project_id || config.default_project_id;
   let tracker_id = req.query.tracker_id || config.default_tracker_id;
-  locals.json.currentdata = {};
-  locals.json.postdata = {
-    'issue' : {
-      'project_id' : project_id,
-      'tracker_id' : tracker_id
-    }
+  locals.json.issue = {};
+  locals.json.defaults = {
+    'project_id' : project_id,
+    'tracker_id' : tracker_id
   }
   getLocals(project_id, tracker_id)
   .then(function(){
@@ -114,24 +102,22 @@ router.route('/new')
   })
 })
 .post(function(req, res) {
-  request({
-    url: `${config.api_url}issues${format}`,
-    method: 'POST',
-    headers: headers,
-    json: true,
-    form: req.body
-  }, function (error, response, body) {
+  request({ method: 'POST', url: `${config.api_url}issues${format}`, resolveWithFullResponse: true, headers: headers, json: true, body: req.body })
+  .then(function (response) {
     res.send(response);
   })
+  .catch(function (err) {
+    res.send(err);
+  });
 });
 
 // /issues/:id
 router.route('/:id(\\d+)')
 .get(function(req, res) {
-  request({ url: `${config.api_url}issues/${req.params.id}${format}${config.include_param}`, headers: headers, json: true })
+  let id = req.params.id;
+  request({ url: `${config.api_url}issues/${id}${format}${config.include_param}`, headers: headers, json: true })
   .then(function (data) {
-    locals.json.currentdata = data;
-    locals.json.postdata = {};
+    locals.json.issue = data.issue;
     getLocals(data.issue.project.id, data.issue.tracker.id)
     .then(function () {
       res.render('issue', locals);
@@ -139,14 +125,13 @@ router.route('/:id(\\d+)')
   })
 })
 .post(function(req, res) {
-  request({
-    url: `${config.api_url}issues/${req.params.id}${format}`,
-    method: 'PUT',
-    headers: headers,
-    json: true,
-    form: req.body
-  }, function (error, response, body) {
+  let id = req.params.id;
+  request({ method: 'PUT', url: `${config.api_url}issues/${id}${format}`, resolveWithFullResponse: true, headers: headers, json: true, body: req.body })
+  .then(function (response) {
     res.send(response);
+  })
+  .catch(function (err) {
+    res.send(err);
   });
 });
 

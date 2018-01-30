@@ -8,17 +8,16 @@ Redmine Xlsx Input-Output tool.
 
 ## Description
 
-例えば、  
-http://localhost/redmine/issues/1 にアクセスするとチケット#1の情報を表示しますが、  
-http://localhost:3000/redmine/issues/1 にアクセスするとチケット#1をExcel形式でインポート/エクスポートできる画面を表示します。
+http://localhost:3000/issues/1 にアクセスすると、チケット#1をExcel形式でインポート/エクスポートできる画面を表示します。
 
 ## Requirement
 
 このツールは[Express](https://www.npmjs.com/package/express)をベースとし、下記のnpmモジュールを使用しています。
 
 * [xlsx-populate](https://www.npmjs.com/package/xlsx-populate) Excelファイルの読み書き
-* [request](https://www.npmjs.com/package/request) Redmine Rest APIとの通信
-* [bootstrap](https://www.npmjs.com/package/bootstrap)
+* [Request - Simplified HTTP client](https://www.npmjs.com/package/request) Redmine Rest APIとの通信
+* [Request-Promise-Native](https://github.com/request/request-promise-native) 同上
+* [Bootstrap](https://www.npmjs.com/package/bootstrap)
 * [jQuery](https://www.npmjs.com/package/jquery)
 * [moment](https://www.npmjs.com/package/moment) 日付の計算
 
