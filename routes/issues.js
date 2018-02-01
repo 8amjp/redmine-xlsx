@@ -3,24 +3,13 @@ var router = express.Router();
 var request = require('request-promise-native');
 
 var config = require('../config/config');
-config.host_name = config.host_name || 'http://localhost/redmine/';
-var components = config.host_name.match(/^(.+?):\/\/([0-9a-zA-Z-_\.]+):?(\d+)?(\/.*)?$/);
-config.redmine_protocol = components[1];
-config.redmine_hostname = components[2];
-config.redmine_port = (components[3] === undefined ? '' : `:${components[3]}`);
-config.redmine_pathname = components[4];
-config.api_url = `${config.redmine_protocol}://localhost${config.redmine_port}${config.redmine_pathname}`
-config.include_param = config.include_param || '';
-config.default_project_id = config.default_project_id || 1;
-config.default_tracker_id = config.default_tracker_id || 1;
-
 var template = require('../config/template');
 
 var locals = {
   'json': {
     'issue': {},
     'template': {},
-    'defaults': {},
+    'defaults': config.defaults,
     'projects': {},
     'trackers': {},
     'issue_statuses': {},
@@ -29,8 +18,8 @@ var locals = {
     'versions': {}
   },
   'project': {},
-  'trackers': {},
-  'host_name': config.host_name,
+  'tracker': {},
+  'host_name': config.host_name || 'http://localhost/redmine/',
   'switch_user': ''
 };
 var headers = {
@@ -55,7 +44,7 @@ router.use('/', function (req, res, next) {
       console.log(new Date(), 'get /projects: failed.'); //// console.log
     }),
     // trackers
-    request({ url: `${config.api_url}trackers${format}`, headers: headers, json: true })
+    request({ url: `${config.api_base_url}trackers${format}`, headers: headers, json: true })
     .then(function (data) {
       locals.json.trackers = data.trackers;
       console.log(new Date(), 'get /trackers: done.'); //// console.log
@@ -64,7 +53,7 @@ router.use('/', function (req, res, next) {
       console.log(new Date(), 'get /trackers: failed.'); //// console.log
     }),
     // issue_statuses
-    request({ url: `${config.api_url}issue_statuses${format}`, headers: headers, json: true })
+    request({ url: `${config.api_base_url}issue_statuses${format}`, headers: headers, json: true })
     .then(function (data) {
       locals.json.issue_statuses = data.issue_statuses;
       console.log(new Date(), 'get /issue_statuses: done.'); //// console.log
@@ -73,7 +62,7 @@ router.use('/', function (req, res, next) {
       console.log(new Date(), 'get /issue_statuses: failed.'); //// console.log
     }),
     // issue_priorities
-    request({ url: `${config.api_url}enumerations/issue_priorities${format}`, headers: headers, json: true })
+    request({ url: `${config.api_base_url}enumerations/issue_priorities${format}`, headers: headers, json: true })
     .then(function (data) {
       locals.json.issue_priorities = data.issue_priorities;
       console.log(new Date(), 'get /enumerations/issue_priorities: done.'); //// console.log
@@ -89,20 +78,16 @@ router.use('/', function (req, res, next) {
 // /issues/new
 router.route('/new')
 .get(function(req, res) {
-  let project_id = req.query.project_id || config.default_project_id;
-  let tracker_id = req.query.tracker_id || config.default_tracker_id;
   locals.json.issue = {};
-  locals.json.defaults = {
-    'project_id' : project_id,
-    'tracker_id' : tracker_id
-  }
-  getLocals(project_id, tracker_id)
+  if(req.query.project_id) locals.json.defaults.project_id = req.query.project_id;
+  if(req.query.tracker_id) locals.json.defaults.tracker_id = req.query.tracker_id;
+  getLocals(locals.json.defaults.project_id, locals.json.defaults.tracker_id)
   .then(function(){
     res.render('new', locals)
   })
 })
 .post(function(req, res) {
-  request({ method: 'POST', url: `${config.api_url}issues${format}`, resolveWithFullResponse: true, headers: headers, json: true, body: req.body })
+  request({ method: 'POST', url: `${config.api_base_url}issues${format}`, resolveWithFullResponse: true, headers: headers, json: true, body: req.body })
   .then(function (response) {
     res.send(response);
   })
@@ -115,7 +100,7 @@ router.route('/new')
 router.route('/:id(\\d+)')
 .get(function(req, res) {
   let id = req.params.id;
-  request({ url: `${config.api_url}issues/${id}${format}${config.include_param}`, headers: headers, json: true })
+  request({ url: `${config.api_base_url}issues/${id}${format}?include=attachments`, headers: headers, json: true })
   .then(function (data) {
     locals.json.issue = data.issue;
     getLocals(data.issue.project.id, data.issue.tracker.id)
@@ -126,7 +111,7 @@ router.route('/:id(\\d+)')
 })
 .post(function(req, res) {
   let id = req.params.id;
-  request({ method: 'PUT', url: `${config.api_url}issues/${id}${format}`, resolveWithFullResponse: true, headers: headers, json: true, body: req.body })
+  request({ method: 'PUT', url: `${config.api_base_url}issues/${id}${format}`, resolveWithFullResponse: true, headers: headers, json: true, body: req.body })
   .then(function (response) {
     res.send(response);
   })
@@ -140,7 +125,7 @@ function getLocals(project_id, tracker_id) {
   return new Promise(function(resolve, reject) {
     Promise.all([
       // issue_categories
-      request({ url: `${config.api_url}projects/${project_id}/issue_categories${format}`, headers: headers, json: true })
+      request({ url: `${config.api_base_url}projects/${project_id}/issue_categories${format}`, headers: headers, json: true })
       .then(function (data) {
         locals.json.issue_categories = data.issue_categories;
         console.log(new Date(), 'get /issue_categories: done.'); //// console.log
@@ -149,7 +134,7 @@ function getLocals(project_id, tracker_id) {
         console.log(new Date(), 'get /issue_categories: failed.'); //// console.log
       }),
       // versions
-      request({ url: `${config.api_url}projects/${project_id}/versions${format}`, headers: headers, json: true })
+      request({ url: `${config.api_base_url}projects/${project_id}/versions${format}`, headers: headers, json: true })
       .then(function (data) {
         locals.json.versions = data.versions;
         console.log(new Date(), 'get /versions: done.'); //// console.log
@@ -179,7 +164,7 @@ function requestAllData(key, param) {
     var items = [];
     var offset = 0;
     function loop(offset) {
-      request({ url: `${config.api_url}${param || key}${format}?offset=${offset}&limit=100`, headers: headers, json: true })
+      request({ url: `${config.api_base_url}${param || key}${format}?offset=${offset}&limit=100`, headers: headers, json: true })
       .then(function(json){
         Array.prototype.push.apply(items, json[key]);
         if (items.length >= json.total_count || !json.total_count) {
