@@ -1,9 +1,9 @@
-Redmine Xio
-===========
+redmine-xlsx
+============
 
-Redmine Xlsx Input-Output tool.
+Redmine issue to Excel File Format (.xlsx) Conversion Tool.
     
-[Redmine](http://www.redmine.org/)に、Excelファイルをインポート/エクスポートできる機能を追加します。  
+[Redmine](http://www.redmine.org/)に、Excelファイル(.xlsx)をインポート/エクスポートできる機能を追加します。  
 が、プラグインを作るのは大変なので、[Express](https://www.npmjs.com/package/express)でWebサーバーを立ててAPIで連携します。
 
 ## Description
@@ -25,7 +25,7 @@ http://localhost:3000/issues/1 にアクセスすると、チケット#1をExcel
 
 Redmineと同じサーバー上に
 
-`git clone git://github.com/8amjp/redmine-xio.git`
+`git clone git://github.com/8amjp/redmine-xlsx.git`
 
 で取得して、
 
