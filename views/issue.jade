@@ -4,7 +4,10 @@ block content
   .row
     .col-md-6.py-3
       h1.text-success Import/Export Ticket
-      p.lead チケット##{json.issue.id}に対して処理を行います。
+      p.lead
+        | チケット
+        a(href='#{host_name}issues/#{id}') ##{id}
+        | に対して処理を行います。
     .col-md-6.py-3
       include components/template
   hr
