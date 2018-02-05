@@ -6,6 +6,8 @@ Redmine issue to Excel File Format (.xlsx) Conversion Tool.
 [Redmine](http://www.redmine.org/)に、Excelファイル(.xlsx)をインポート/エクスポートできる機能を追加します。  
 が、プラグインを作るのは大変なので、[Express](https://www.npmjs.com/package/express)でWebサーバーを立ててAPIで連携します。
 
+(以下、書きかけです。ごめんなさい。あと英語出来ません。重ね重ねごめんなさい)
+
 ## Description
 
 http://localhost:3000/issues/1 にアクセスすると、チケット#1をExcel形式でインポート/エクスポートできる画面を表示します。
@@ -40,7 +42,12 @@ Redmineと同じサーバー上に
 ### 設定ファイル
 
 #### config.json
-この設定ファイルでは、Redmineと連携するためのAPIアクセスキーを指定します。
+この設定ファイルでは、以下の項目を指定します。
+
+* api_key: Redmineと連携するためのAPIアクセスキーを指定します。
+* api_base_url: 
+* host_name: 
+* defaults プロジェクトID等の既定値を指定します。
 
 #### templates.json
 
@@ -52,7 +59,6 @@ Excelファイル(.xlsx)のエクスポートは、事前に用意したテン�
 * Redmineの「プロジェクト」毎に準備する
 * Redmineの「プロジェクト」及び「トラッカー」毎に準備する 
 
-##### title
 
 ##### filename
 
