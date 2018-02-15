@@ -6,7 +6,7 @@ block content
       h1.text-success Import/Export Ticket
       p.lead
         | チケット
-        a(href='#{host_name}issues/#{id}') ##{id}
+        a(href='#{host_name}issues/#{json.issue.id}') ##{json.issue.id}
         | に対して処理を行います。
     .col-md-6.py-3
       include components/template
@@ -20,4 +20,4 @@ block content
 
 block additional-script
   script(src='/javascripts/xlsx.js')
-  script(src='/javascripts/core.js', id='core', data-json='#{JSON.stringify(json)}', data-host_name='#{host_name}')
+  script(src='/javascripts/core.js', id='core', data-json='#{JSON.stringify(json)}', data-host_name='#{host_name}', data-workbookname='#{workbookname}')

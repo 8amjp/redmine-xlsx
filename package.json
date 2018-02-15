@@ -10,6 +10,7 @@
     "bootstrap": "^4.0.0",
     "cookie-parser": "~1.4.3",
     "debug": "~2.6.9",
+    "es6-template-strings": "^2.0.1",
     "express": "~4.15.5",
     "jade": "~1.11.0",
     "jquery": "^3.3.1",

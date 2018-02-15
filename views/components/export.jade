@@ -1,7 +1,10 @@
 .card.border-success
   .card-body
     h4.card-title.text-success Export
-    p.card-text エクセル形式の帳票をダウンロードします。
+    p.card-text
+      | チケットをエクセル形式にエクスポートし、「
+      strong #{workbookname}
+      | 」という名前でダウンロードします。
     .text-right.my-3
       button#export-submit.btn.btn-success(type='button') Export
     #export-result

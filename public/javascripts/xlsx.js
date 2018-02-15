@@ -10,7 +10,7 @@ var xlsx = (function() {
   var _defaults = {};
   var _template = {};
   var _enumerations = {};
-  var _outputfilename = 'issue';
+  var _workbookname = 'Book1.xlsx';
 
   return {
     // 現在のデータを設定
@@ -29,8 +29,8 @@ var xlsx = (function() {
     set enumerations(value) {
       _enumerations = value;
     },
-    set outputfilename(value) {
-      _outputfilename = value;
+    set workbookname(value) {
+      _workbookname = value;
     },
     
     // ファイルを入力
@@ -71,17 +71,16 @@ var xlsx = (function() {
 
     // ファイルを出力
     exportExcel: function() {
-      let defaultName = `${_outputfilename}.xlsx`;
       generate()
       .then(function (blob) {
         if (window.navigator && window.navigator.msSaveOrOpenBlob) {
-          window.navigator.msSaveOrOpenBlob(blob, defaultName);
+          window.navigator.msSaveOrOpenBlob(blob, _workbookname);
         } else {
           let url = window.URL.createObjectURL(blob);
           let a = document.createElement('a');
           document.body.appendChild(a);
           a.href = url;
-          a.download = defaultName;
+          a.download = _workbookname;
           a.click();
           window.URL.revokeObjectURL(url);
           document.body.removeChild(a);
@@ -219,10 +218,10 @@ var xlsx = (function() {
   }
 
   // 出力用テンプレートファイルの取得
-  function getTemplateFile(filename) {
+  function getTemplateFile(url) {
     return new Promise(function (resolve, reject) {
       var xhr = new XMLHttpRequest();
-      xhr.open('GET', filename, true);
+      xhr.open('GET', url, true);
       xhr.responseType = 'arraybuffer';
       xhr.onload = () => {
         if (xhr.status === 200) {

@@ -2,6 +2,7 @@
   "api_key": "0000000000000000000000000000000000000000",
   "api_base_url": "http://localhost/redmine/",
   "host_name": "http://localhost/redmine/",
+  "workbookname": "${issue.project.name} - ${issue.tracker.name} #${issue.id}.xlsx",
   "defaults" : {
     "project_id": 1,
     "tracker_id": 1

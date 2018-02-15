@@ -12,7 +12,7 @@
     // 現在のデータがあればそれを表示、なければテキストエリアをを無効にする
     if(0 !== Object.keys(json.issue).length) {
       xlsx.issue = json.issue;
-      if(json.issue.id) xlsx.outputfilename = json.issue.id;
+      if(core.dataset.workbookname) xlsx.workbookname = core.dataset.workbookname;
       showCurrentIssue(json.issue);
     } else {
       disableCurrentIssue();

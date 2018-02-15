@@ -1,9 +1,10 @@
 var express = require('express');
 var router = express.Router();
 var request = require('request-promise-native');
+var template = require('es6-template-strings');
 
 var config = require('../config/config');
-var template = require('../config/template');
+var xltx = require('../config/template');
 
 var locals = {
   'json': {
@@ -17,6 +18,7 @@ var locals = {
     'issue_categories': {},
     'versions': {}
   },
+  'workbookname': '',
   'project': {},
   'tracker': {},
   'host_name': config.host_name || 'http://localhost/redmine/',
@@ -103,6 +105,7 @@ router.route('/:id(\\d+)')
   request({ url: `${config.api_base_url}issues/${id}${format}?include=attachments`, headers: headers, json: true })
   .then(function (data) {
     locals.json.issue = data.issue;
+    locals.workbookname = template(config.workbookname, { issue: data.issue });
     getLocals(data.issue.project.id, data.issue.tracker.id)
     .then(function () {
       res.render('issue', locals);
@@ -146,9 +149,9 @@ function getLocals(project_id, tracker_id) {
     ])
     .then(function(){
       locals.json.template = ( 
-        template[project_id] && template[project_id][tracker_id] ? template[project_id][tracker_id] :
-        template[project_id] ? template[project_id] :
-        template
+        xltx[project_id] && xltx[project_id][tracker_id] ? xltx[project_id][tracker_id] :
+        xltx[project_id] ? xltx[project_id] :
+        xltx
       );
       locals.project = (0 !== Object.keys(locals.json.projects).length) ? locals.json.projects.filter( function(e) { return (e.id == project_id); })[0] : {};
       locals.tracker = (0 !== Object.keys(locals.json.trackers).length) ? locals.json.trackers.filter( function(e) { return (e.id == tracker_id); })[0] : {};
